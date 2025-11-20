@@ -1,0 +1,24 @@
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+scipy>=1.10.0
+
+# ============================================================================
+# Optional Dependencies for Real GPU Calibration (Level 3 Fidelity)
+# ============================================================================
+# Level 1: Synthetic (default) - No GPU required, uses parametric formulas
+# Level 2: BurstGPT dataset (recommended) - Real traces, synthetic service time
+# Level 3: Real GPU calibration (publication-grade) - Requires RTX 4080 or better
+#
+# For Level 3, install vLLM for Qwen3-1.7B calibration:
+# pip install vllm torch
+#
+# Uncomment below for manual installation:
+# vllm>=0.5.0
+# torch>=2.0.0
+
+# ============================================================================
+# Legacy: transformers-based calibration (slower than vLLM)
+# ============================================================================
+# transformers>=4.40.0
+# accelerate>=0.20.0
