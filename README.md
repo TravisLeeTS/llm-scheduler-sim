@@ -17,12 +17,18 @@
 pip install -r requirements.txt
 ```
 
-### 2. Download BurstGPT Dataset
+### 2. Test All Fidelity Levels
 ```powershell
-curl -L "https://github.com/HPMLL/BurstGPT/raw/main/data/BurstGPT_1.csv" -o "data/BurstGPT_sample.csv"
+# Comprehensive test of all three levels
+python scripts/test_all_levels.py --level all
+
+# Or test individual levels
+python scripts/test_all_levels.py --level 1  # Synthetic (fastest)
+python scripts/test_all_levels.py --level 2  # BurstGPT dataset
+python scripts/test_all_levels.py --level 3  # GPU calibrated
 ```
 
-### 3. Run Comparison Test
+### 3. Run Comparison Experiments
 ```powershell
 python scripts/run_mb_dynamic.py --compare --num-requests 5000
 ```
@@ -56,13 +62,14 @@ This compares all three scheduler modes with the discrete-event simulator!
 2. **`dynamic_no_bins`** - Single queue with SLA controller + memory constraint
 3. **`multi_bin_dynamic`** - K bins + dynamic batching (our contribution)
 
-### 🎯 Three Fidelity Levels
+## 🎯 Three Fidelity Levels
 
 | Level | Description | Requirements | Validity |
 |-------|-------------|--------------|----------|
 | **Level 1: Synthetic** | Formula-based service time | None | ✓ Relative comparisons valid |
 | **Level 2: BurstGPT** | Real Azure dataset | Download CSV (48MB) | ✓✓ Realistic workload |
 | **Level 3: GPU Calibrated** | Measured latency from RTX 4080 | GPU + Transformers/vLLM | ✓✓✓ Production-ready |
+| **Level 4: Full Production** | BurstGPT + GPU Calibrated | Both CSVs | ✓✓✓✓ Maximum realism ⭐ |
 
 ---
 
@@ -192,8 +199,47 @@ See `mb_dyn_sim/config.py` for all options.
 
 ---
 
+## Testing
+
+### Automated Testing Suite
+
+A comprehensive test script validates all four fidelity levels:
+
+```powershell
+# Test all levels at once (~0.5 second total)
+python scripts/test_all_levels.py --level all
+
+# Test individual levels
+python scripts/test_all_levels.py --level 1  # Synthetic
+python scripts/test_all_levels.py --level 2  # BurstGPT
+python scripts/test_all_levels.py --level 3  # GPU Calibrated
+python scripts/test_all_levels.py --level 4  # Full Production ⭐
+```
+
+**Test Coverage:**
+- ✅ **Level 1 (Synthetic)**: Fast algorithm validation with formula-based latency
+- ✅ **Level 2 (BurstGPT)**: Realistic workload patterns from Azure traces  
+- ✅ **Level 3 (GPU Calibrated)**: Production accuracy with real GPU measurements
+- ✅ **Level 4 (Full Production)**: Maximum realism - Real workload + Real GPU ⭐
+
+**What Gets Tested:**
+- All three scheduler modes produce distinct results
+- SLA violations decrease as expected: static > dynamic > multi-bin
+- Workload generation (Poisson + BurstGPT dataset)
+- Equal-mass bin boundary computation
+- GPU calibration data loading (if available)
+
+**Test Results:** See [TESTING_SUMMARY.md](TESTING_SUMMARY.md) for detailed results.
+
+**Recommended for Publication:** Use Level 4 for final results (combines real Azure workload with real GPU measurements).
+
+---
+
 ## Documentation
 
+- **[TESTING_SUMMARY.md](TESTING_SUMMARY.md)** - Complete test results for all 4 levels ⭐
+- **[LEVEL_4_EXPLAINED.md](LEVEL_4_EXPLAINED.md)** - Deep dive into production simulation
+- **[FIDELITY_LEVELS.md](FIDELITY_LEVELS.md)** - Quick reference for all levels
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Visual diagrams and data flow
 - **[PAPER_REQUIREMENTS.md](PAPER_REQUIREMENTS.md)** - Exact algorithm specifications
 - **[EXPERIMENT_GUIDE.md](EXPERIMENT_GUIDE.md)** - Complete experiment guide
@@ -284,5 +330,5 @@ See LICENSE file for details.
 
 ---
 
-**Status:** ✅ Complete and validated with real BurstGPT data  
+**Status:** ✅ Complete and validated with real BurstGPT data + GPU calibration (Level 4)  
 **Last Updated:** November 2025
