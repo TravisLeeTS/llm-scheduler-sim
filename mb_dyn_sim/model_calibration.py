@@ -19,7 +19,7 @@ MODEL_NAME = "Qwen/Qwen2.5-0.6B-Instruct"  # Updated to latest Qwen model
 
 def calibrate_with_vllm(device: str = "cuda") -> Dict:
     """
-    Calibrate using vLLM for realistic production latency (Level 3 fidelity).
+    Calibrate using vLLM for realistic production latency.
     
     vLLM provides better batching and more realistic inference than transformers.
     This is the recommended calibration method for publication-quality results.
@@ -289,7 +289,7 @@ def get_calibration_params(force_recalibrate: bool = False, use_vllm: bool = Fal
     
     if _calibration_params is None or force_recalibrate:
         if use_vllm or os.environ.get('USE_VLLM', '').lower() == 'true':
-            print("Using vLLM calibration (Level 3 fidelity)...")
+            print("Using vLLM calibration for production accuracy...")
             _calibration_params = calibrate_with_vllm()
         else:
             # Use fallback by default for fast experiments

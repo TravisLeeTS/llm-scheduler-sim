@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
-Run multi-bin dynamic scheduler experiments (paper-faithful).
+Run Multi-Bin + Dynamic Batching scheduler experiments.
 
-This script supports:
-- Three experiment modes: multi_bin_only, dynamic_only, multi_bin_dynamic
-- Equal-mass bin boundaries (paper requirement)
-- BurstGPT dataset loading
-- vLLM calibration (optional)
-- Poisson and BurstGPT arrival patterns
+Level 4 Production Mode (Default):
+- BurstGPT dataset arrivals (real Azure traces)
+- GPU-calibrated latency model (RTX 4080)
+- Maximum realism for deployment planning
+
+Key Multi-Bin Insight:
+- Binning controls batch composition (who gets batched together)
+- FIFO within bins maintains fairness
+- Bins reduce E[max(t_j) | bin] → improved throughput
 """
 
 import argparse
@@ -21,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from mb_dyn_sim.config import SchedulerConfig, compute_equal_mass_boundaries
 from mb_dyn_sim.workload import generate_workload
 from mb_dyn_sim.experiments import run_experiment, compare_schedulers, plot_comparison, plot_k_bins_sensitivity
-from mb_dyn_sim.metrics import print_metrics_table
+from mb_dyn_sim.metrics import print_metrics_table, compute_batch_statistics
 
 
 def main():
@@ -32,8 +35,8 @@ def main():
     parser.add_argument(
         '--num-gpus',
         type=int,
-        default=1,
-        help='Number of GPUs to simulate (default: 1)'
+        default=4,
+        help='Number of GPUs to simulate (default: 4 for high-pressure testing)'
     )
     
     parser.add_argument(
@@ -60,18 +63,10 @@ def main():
     )
     
     parser.add_argument(
-        '--arrival-profile',
-        type=str,
-        choices=['poisson', 'burstgpt_like', 'burstgpt_dataset'],
-        default='burstgpt_like',
-        help='Arrival pattern (default: burstgpt_like)'
-    )
-    
-    parser.add_argument(
         '--dataset-path',
         type=str,
-        default='',
-        help='Path to BurstGPT dataset CSV file'
+        default='data/BurstGPT_sample.csv',
+        help='Path to BurstGPT dataset CSV file (default: data/BurstGPT_sample.csv)'
     )
     
     parser.add_argument(
@@ -83,7 +78,8 @@ def main():
     parser.add_argument(
         '--use-real-calibration',
         action='store_true',
-        help='Use real GPU calibration data (requires calibration CSV)'
+        default=True,
+        help='Use real GPU calibration data (default: True for Level 4)'
     )
     
     parser.add_argument(
@@ -96,8 +92,8 @@ def main():
     parser.add_argument(
         '--rps-scaling',
         type=float,
-        default=1.0,
-        help='RPS scaling factor for BurstGPT dataset (default: 1.0)'
+        default=200.0,
+        help='RPS scaling factor for BurstGPT dataset (default: 200.0 for high-pressure)'
     )
     
     parser.add_argument(
@@ -105,13 +101,6 @@ def main():
         action='store_true',
         default=True,
         help='Use equal-mass bin boundaries (paper requirement, default: True)'
-    )
-    
-    parser.add_argument(
-        '--poisson-lambda',
-        type=float,
-        default=50.0,
-        help='Poisson arrival rate (requests/second) for poisson mode (default: 50.0)'
     )
     
     parser.add_argument(
@@ -146,8 +135,8 @@ def main():
     parser.add_argument(
         '--d-sla',
         type=float,
-        default=1.0,
-        help='SLA deadline in seconds (default: 1.0)'
+        default=0.5,
+        help='SLA deadline in seconds (default: 0.5 - STRICT for high-pressure)'
     )
     
     parser.add_argument(
@@ -168,13 +157,10 @@ def main():
     if args.use_vllm:
         os.environ['USE_VLLM'] = 'true'
     
-    # Determine workload source
-    workload_source = "synthetic"
-    if args.arrival_profile == "burstgpt_dataset":
-        workload_source = "burstgpt_dataset"
-        if not args.dataset_path:
-            print("ERROR: --dataset-path required when using burstgpt_dataset")
-            return
+    # Level 4: BurstGPT dataset only
+    if not args.dataset_path:
+        print("ERROR: --dataset-path required for Level 4 production mode")
+        return
     
     # Create configuration
     cfg = SchedulerConfig(
@@ -183,10 +169,8 @@ def main():
         NUM_REQUESTS=args.num_requests,
         SEED=args.seed,
         D_SLA=args.d_sla,
-        ARRIVAL_PROFILE=args.arrival_profile,
-        POISSON_LAMBDA=args.poisson_lambda,
         DATASET_PATH=args.dataset_path,
-        WORKLOAD_SOURCE=workload_source,
+        WORKLOAD_SOURCE="burstgpt_dataset",
         RPS_SCALING=args.rps_scaling,
         USE_EQUAL_MASS_BINS=args.use_equal_mass_bins,
         EXPERIMENT_MODE=args.experiment_mode or "multi_bin_dynamic",
@@ -203,10 +187,9 @@ def main():
         sample_cfg = SchedulerConfig(
             NUM_REQUESTS=min(5000, cfg.NUM_REQUESTS),
             SEED=cfg.SEED,
-            ARRIVAL_PROFILE=cfg.ARRIVAL_PROFILE,
-            POISSON_LAMBDA=cfg.POISSON_LAMBDA,
             DATASET_PATH=cfg.DATASET_PATH,
-            WORKLOAD_SOURCE=cfg.WORKLOAD_SOURCE,
+            WORKLOAD_SOURCE="burstgpt_dataset",
+            RPS_SCALING=cfg.RPS_SCALING,
         )
         sample_requests = generate_workload(sample_cfg)
         predicted_lengths = [r.predicted_output_len for r in sample_requests]
@@ -214,7 +197,7 @@ def main():
         print(f"Equal-mass boundaries: {cfg.BIN_BOUNDARIES}")
     
     print("="*70)
-    print("Multi-Bin Dynamic Scheduler Simulation (Paper-Faithful)")
+    print("Multi-Bin Dynamic Scheduler Simulation (Level 4 Production)")
     print("="*70)
     print(f"\nConfiguration:")
     print(f"  Experiment mode:   {cfg.EXPERIMENT_MODE}")
@@ -222,11 +205,8 @@ def main():
     print(f"  K_BINS:            {cfg.K_BINS}")
     print(f"  NUM_REQUESTS:      {cfg.NUM_REQUESTS}")
     print(f"  D_SLA:             {cfg.D_SLA}s")
-    print(f"  Arrival profile:   {cfg.ARRIVAL_PROFILE}")
-    if cfg.ARRIVAL_PROFILE == "poisson":
-        print(f"  Poisson λ:         {cfg.POISSON_LAMBDA} req/s")
-    if cfg.WORKLOAD_SOURCE == "burstgpt_dataset":
-        print(f"  Dataset:           {cfg.DATASET_PATH}")
+    print(f"  Dataset:           {cfg.DATASET_PATH}")
+    print(f"  RPS Scaling:       {cfg.RPS_SCALING}x")
     print(f"  Equal-mass bins:   {cfg.USE_EQUAL_MASS_BINS}")
     if cfg.EXPERIMENT_MODE == "multi_bin_only":
         print(f"  Fixed batch size:  {cfg.B_FIXED}")
@@ -261,12 +241,36 @@ def main():
         # Run single scheduler
         result = run_experiment(cfg, args.scheduler, args.load_level)
         
-        # Print metrics
+        # Compute batch statistics
+        batch_stats = compute_batch_statistics(result['completed_requests'])
+        
+        # Print metrics with paper-specific details
         print_metrics_table(
             result['metrics'],
             result['gpu_metrics'],
-            args.scheduler
+            args.scheduler,
+            show_paper_metrics=True
         )
+        
+        # Print batch statistics
+        print(f"\n[Batch Statistics]")
+        print(f"  Num batches:         {batch_stats['num_batches']}")
+        print(f"  Avg batch size:      {batch_stats['avg_batch_size']:.2f}")
+        print(f"  Min batch size:      {batch_stats['min_batch_size']}")
+        print(f"  Max batch size:      {batch_stats['max_batch_size']}")
+        print(f"  Std batch size:      {batch_stats['std_batch_size']:.2f}")
+        print()
+        
+        # Print memory statistics if available
+        if result.get('memory_stats'):
+            mem = result['memory_stats']
+            print(f"\n[Memory Usage Estimate - Avg Batch]")
+            print(f"  Batch size:          {mem['batch_size']}")
+            print(f"  Total tokens:        {mem['total_tokens_in_batch']}")
+            print(f"  KV cache memory:     {mem['kv_cache_memory_gb']:.4f} GB")
+            print(f"  Model memory:        {mem['model_memory_gb']:.2f} GB")
+            print(f"  Total memory:        {mem['total_memory_gb']:.4f} GB")
+            print()
 
 
 if __name__ == '__main__':

@@ -80,8 +80,9 @@ class Simulator:
         self.current_time = 0.0
         self.event_queue: List[Event] = []
         
-        # GPU states
+        # GPU states (OPTIMIZED: pre-allocate list for faster access)
         self.gpus = [GPUState(gpu_id=i) for i in range(cfg.NUM_GPUS)]
+        self._idle_gpus = set(range(cfg.NUM_GPUS))  # Track idle GPUs for O(1) lookup
         
         # Initialize service time function
         if cfg.USE_REAL_CALIBRATION and cfg.CALIBRATION_CSV_PATH:
@@ -158,7 +159,7 @@ class Simulator:
     
     def _handle_arrival(self, req: Request) -> None:
         """
-        Handle a request arrival event.
+        Handle a request arrival event (OPTIMIZED).
         
         Args:
             req: The arriving request
@@ -166,10 +167,9 @@ class Simulator:
         # Enqueue request in scheduler
         self.scheduler.enqueue_request(req)
         
-        # Try to schedule work on any idle GPU
-        for gpu in self.gpus:
-            if not gpu.busy:
-                self._try_schedule_gpu(gpu)
+        # OPTIMIZATION: Only check idle GPUs (O(idle) instead of O(total))
+        for gpu_id in list(self._idle_gpus):
+            self._try_schedule_gpu(self.gpus[gpu_id])
     
     def _handle_gpu_free(self, gpu_id: int) -> None:
         """
@@ -183,12 +183,28 @@ class Simulator:
         # Calculate service time for feedback
         if gpu.current_batch:
             service_time = self.current_time - min(r.start_service_time for r in gpu.current_batch)
+            
+            # Determine which bin this batch came from (for bin-specific feedback)
+            # All requests in a batch come from the same bin (Multi-Bin invariant)
+            if gpu.current_batch and hasattr(gpu.current_batch[0], 'predicted_output_len'):
+                # Determine bin from first request
+                req = gpu.current_batch[0]
+                bin_idx = self._get_bin_idx(req.predicted_output_len)
+            else:
+                bin_idx = -1
         else:
             service_time = 0.0
+            bin_idx = -1
         
         # Update batcher statistics (feedback loop for Algorithm 1 & 2)
+        # Only multi_bin uses bin-specific learning, dynamic_no_bins uses global
         if self.batcher and hasattr(self.batcher, 'update_after_batch'):
-            self.batcher.update_after_batch(gpu.current_batch, service_time)
+            if self.scheduler_type == "dynamic_no_bins":
+                # Force global statistics for dynamic_no_bins
+                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=-1)
+            else:
+                # multi_bin_dynamic uses bin-specific learning
+                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=bin_idx)
         
         # Mark completed requests
         for req in gpu.current_batch:
@@ -199,6 +215,7 @@ class Simulator:
         # Update GPU state
         gpu.busy = False
         gpu.current_batch = []
+        self._idle_gpus.add(gpu.gpu_id)  # Mark as idle
         
         # Try to schedule new work on this GPU
         self._try_schedule_gpu(gpu)
@@ -214,10 +231,19 @@ class Simulator:
             return
         
         # Get candidates from scheduler
-        candidates = self.scheduler.get_candidates_for_gpu(
+        # For MultiBinScheduler, this returns (candidates, bin_idx)
+        # For other schedulers, returns just candidates (need to handle both)
+        result = self.scheduler.get_candidates_for_gpu(
             gpu.gpu_id,
             self.cfg.MAX_CANDIDATES
         )
+        
+        # Handle both tuple (MultiBin) and list (other schedulers) returns
+        if isinstance(result, tuple):
+            candidates, bin_idx = result
+        else:
+            candidates = result
+            bin_idx = -1
         
         if not candidates:
             return  # No work available
@@ -234,18 +260,49 @@ class Simulator:
                 service_time = 0.0
         else:
             # Dynamic batching (dynamic_no_bins or multi_bin_dynamic)
-            batch, service_time = self.batcher.make_batch(
-                self.current_time,
-                candidates
-            )
+            # Only multi_bin_dynamic uses bin-specific statistics (bin_idx >= 0)
+            # dynamic_no_bins always uses global statistics (bin_idx = -1)
+            if self.scheduler_type == "dynamic_no_bins":
+                # Force global statistics for dynamic_no_bins (no bin information)
+                batch, service_time = self.batcher.make_batch(
+                    self.current_time,
+                    candidates,
+                    bin_idx=-1  # Always use global statistics
+                )
+            else:
+                # multi_bin_dynamic uses bin-specific statistics
+                batch, service_time = self.batcher.make_batch(
+                    self.current_time,
+                    candidates,
+                    bin_idx=bin_idx  # Enables bin-specific statistics and SLA control
+                )
             
-            # Put unused candidates back in queue
+            
+            # Put unused candidates back at the FRONT of the queue to maintain FIFO ordering
+            # CRITICAL FIX: Re-enqueuing at the back causes queue explosion for dynamic batching
             unused = [c for c in candidates if c not in batch]
-            for req in unused:
-                self.scheduler.enqueue_request(req)
+            if unused:
+                # Put back in reverse order so FIFO is preserved
+                if isinstance(self.scheduler, DynamicNoBinsScheduler):
+                    # For single queue, put unused candidates back at front
+                    for req in reversed(unused):
+                        self.scheduler.queue.appendleft(req)
+                elif isinstance(self.scheduler, MultiBinScheduler):
+                    # For multi-bin, put back in appropriate bins at front
+                    for req in reversed(unused):
+                        bin_idx = self._get_bin_idx(req.predicted_output_len)
+                        self.scheduler.bins[bin_idx].appendleft(req)
+                else:
+                    # Fallback: re-enqueue normally (shouldn't happen for dynamic schedulers)
+                    for req in unused:
+                        self.scheduler.enqueue_request(req)
         
         if not batch:
             return  # No valid batch could be formed
+        
+        # Record batch composition (Multi-Bin paper contribution)
+        if hasattr(self.scheduler, 'record_batch_composition') and bin_idx >= 0:
+            self.scheduler.record_batch_composition(batch, bin_idx)
         
         # Mark service start time for all requests in batch
         for req in batch:
@@ -259,6 +316,7 @@ class Simulator:
         gpu.total_batches += 1
         gpu.total_requests += len(batch)
         gpu.total_busy_time += service_time
+        self._idle_gpus.discard(gpu.gpu_id)  # Remove from idle set
         
         # Schedule GPU_FREE event
         self._schedule_event(Event(
@@ -288,3 +346,37 @@ class Simulator:
             })
         
         return stats
+    
+    def _get_bin_idx(self, predicted_output_len: int) -> int:
+        """
+        Determine which bin a request belongs to based on predicted output length.
+        
+        Args:
+            predicted_output_len: Predicted output length in tokens
+        
+        Returns:
+            Bin index (0 to K_BINS-1), or -1 if not using bins
+        """
+        if not hasattr(self.cfg, 'BIN_BOUNDARIES'):
+            return -1
+        
+        for i, (min_len, max_len) in enumerate(self.cfg.BIN_BOUNDARIES):
+            if min_len <= predicted_output_len < max_len:
+                return i
+        return len(self.cfg.BIN_BOUNDARIES) - 1
+    
+    def get_batch_composition_stats(self) -> dict:
+        """
+        Get batch composition statistics from Multi-Bin scheduler.
+        
+        This provides evidence for the Multi-Bin paper's contribution:
+        - How binning improves batch composition
+        - Reduced E[max(t_j) | bin] via narrower length distributions
+        - Improved throughput via better composition
+        
+        Returns:
+            Dictionary with composition efficiency metrics, or empty dict if not Multi-Bin
+        """
+        if hasattr(self.scheduler, 'get_composition_summary'):
+            return self.scheduler.get_composition_summary()
+        return {}

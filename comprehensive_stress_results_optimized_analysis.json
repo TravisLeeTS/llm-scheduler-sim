@@ -1,0 +1,541 @@
+{
+  "experiment_metadata": {
+    "date": "2025-11-24 18:53:33",
+    "dataset": "data/BurstGPT_sample.csv",
+    "calibration": "data/qwen3_1_7b_latency_grid.csv",
+    "rps_scaling": 200.0,
+    "sla_deadline_seconds": 1.0,
+    "total_tests": 34,
+    "step1_tests": 17,
+    "step2_tests": 12,
+    "step3_tests": 5,
+    "successful_tests": 34
+  },
+  "step1_request_scaling": {
+    "static_fifo": {
+      "request_volumes": [
+        1000,
+        10000,
+        100000,
+        1000000
+      ],
+      "sla_violations_pct": [
+        81.89999999999999,
+        91.01,
+        97.82600000000001,
+        99.7825
+      ],
+      "capacity_qps": [
+        0.7213585190697492,
+        0.5639415620919684,
+        0.2624426662940481,
+        0.026642275999356233
+      ],
+      "avg_latency_sec": [
+        7.4221261404284276,
+        24.96845987675699,
+        1283.3010244411919,
+        32118.889782130544
+      ],
+      "p95_latency_sec": [
+        20.397260571428404,
+        72.0513135714286,
+        3862.265365000261,
+        60599.17475499878
+      ],
+      "throughput_req_per_sec": [
+        3.9854061827057965,
+        6.272987342513553,
+        12.07187977433524,
+        12.24932229855459
+      ],
+      "gpu_utilization_pct": [
+        50.7644633913185,
+        71.0604209135882,
+        88.56982133446274,
+        98.83994591967019
+      ],
+      "num_gpus": 1
+    },
+    "dynamic_no_bins": {
+      "request_volumes": [
+        1000,
+        10000,
+        100000,
+        1000000
+      ],
+      "sla_violations_pct": [
+        69.6,
+        81.98,
+        96.53399999999999,
+        99.6539
+      ],
+      "capacity_qps": [
+        1.2288560561187516,
+        1.1284739571980902,
+        0.2917524937924214,
+        0.01805507996994825
+      ],
+      "avg_latency_sec": [
+        3.447039027456731,
+        4.484418881226862,
+        2065.048532912454,
+        80752.32690867822
+      ],
+      "p95_latency_sec": [
+        11.262948845454586,
+        12.405127632662087,
+        7403.16562978298,
+        166241.87567657686
+      ],
+      "throughput_req_per_sec": [
+        4.042289658285367,
+        6.262341604872865,
+        8.417556081720178,
+        5.216723481637748
+      ],
+      "gpu_utilization_pct": [
+        48.19246209413413,
+        65.68558880954201,
+        89.94772569624529,
+        99.37699002460765
+      ],
+      "num_gpus": 1
+    },
+    "multi_bin_dynamic": {
+      "request_volumes": [
+        1000,
+        1000,
+        1000,
+        10000,
+        10000,
+        10000,
+        100000,
+        100000,
+        100000
+      ],
+      "sla_violations_pct": [
+        61.3,
+        22.6,
+        3.3000000000000003,
+        68.27,
+        31.069999999999997,
+        4.44,
+        90.692,
+        80.196,
+        61.316
+      ],
+      "capacity_qps": [
+        1.5052056291662266,
+        3.131924932857842,
+        3.916379823232354,
+        1.9782810163655433,
+        4.334893236667248,
+        6.010179316681103,
+        0.8249527849243413,
+        2.6879501971037842,
+        6.732117083383086
+      ],
+      "avg_latency_sec": [
+        4.178574633808832,
+        1.4040666022856914,
+        0.32840611999999736,
+        30.772124963870727,
+        5.466601323350549,
+        0.38359626810476655,
+        611.2829254353561,
+        260.756902105994,
+        105.53192774035793
+      ],
+      "p95_latency_sec": [
+        24.58464794032619,
+        8.634994585714198,
+        0.8983734999999995,
+        156.9132046755171,
+        33.91580429585342,
+        0.9734539999999808,
+        4627.8617369733765,
+        1938.5869499440896,
+        933.9333960707858
+      ],
+      "throughput_req_per_sec": [
+        3.8894202304036862,
+        4.046414641935196,
+        4.050030840984854,
+        6.234733742091217,
+        6.288833942647973,
+        6.289430009084453,
+        8.862836107910844,
+        13.57276407343862,
+        17.402846353487455
+      ],
+      "gpu_utilization_pct": [
+        52.366515471720575,
+        37.77416557554131,
+        22.973200135919043,
+        85.91436387887627,
+        59.963536172847945,
+        38.00347197426383,
+        96.81929296573911,
+        81.32510524426297,
+        58.744926304210395
+      ],
+      "num_gpus": 1
+    }
+  },
+  "step2_gpu_scaling": {
+    "gpu_counts": [
+      1,
+      1,
+      2,
+      2,
+      4,
+      4,
+      8,
+      16,
+      32,
+      64,
+      100,
+      100
+    ],
+    "capacity_qps": [
+      0.19761260826738614,
+      0.19761260826738614,
+      1.9291574300893102,
+      1.9291574300893102,
+      5.9207656324362095,
+      5.9207656324362095,
+      13.158408450367453,
+      27.883036935460378,
+      36.982900988545985,
+      44.88048860825001,
+      48.08683836435157,
+      48.08683836435157
+    ],
+    "sla_violations_pct": [
+      97.2019,
+      97.2019,
+      85.8262,
+      85.8262,
+      76.6135,
+      76.6135,
+      69.6163,
+      48.2027,
+      31.3826,
+      16.7296,
+      10.7806,
+      10.7806
+    ],
+    "avg_latency_sec": [
+      26824.65449066094,
+      26824.65449066094,
+      12239.137318383995,
+      12239.137318383995,
+      5130.8693260795535,
+      5130.8693260795535,
+      1700.0927228889816,
+      248.18280783448196,
+      23.065977549823742,
+      2.4105642474542273,
+      0.6322435639289566,
+      0.6322435639289566
+    ],
+    "gpu_utilization_pct": [
+      99.74628580684406,
+      99.74628580684406,
+      98.1267527651127,
+      98.1267527651127,
+      93.999861737793,
+      93.999861737793,
+      85.68378589575846,
+      55.752720958444094,
+      30.20199617413398,
+      17.713755244742725,
+      12.451522865437408,
+      12.451522865437408
+    ],
+    "scaling_efficiency": [
+      {
+        "num_gpus": 1,
+        "gpu_ratio": 1.0,
+        "qps_ratio": 1.0,
+        "efficiency": 1.0,
+        "interpretation": "linear"
+      },
+      {
+        "num_gpus": 2,
+        "gpu_ratio": 2.0,
+        "qps_ratio": 9.762319555435457,
+        "efficiency": 4.881159777717729,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 2,
+        "gpu_ratio": 2.0,
+        "qps_ratio": 9.762319555435457,
+        "efficiency": 4.881159777717729,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 4,
+        "gpu_ratio": 4.0,
+        "qps_ratio": 29.96147707551598,
+        "efficiency": 7.490369268878995,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 4,
+        "gpu_ratio": 4.0,
+        "qps_ratio": 29.96147707551598,
+        "efficiency": 7.490369268878995,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 8,
+        "gpu_ratio": 8.0,
+        "qps_ratio": 66.58688717150599,
+        "efficiency": 8.323360896438249,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 16,
+        "gpu_ratio": 16.0,
+        "qps_ratio": 141.09948337776268,
+        "efficiency": 8.818717711110168,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 32,
+        "gpu_ratio": 32.0,
+        "qps_ratio": 187.14848871639342,
+        "efficiency": 5.848390272387294,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 64,
+        "gpu_ratio": 64.0,
+        "qps_ratio": 227.11348735159152,
+        "efficiency": 3.5486482398686174,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 100,
+        "gpu_ratio": 100.0,
+        "qps_ratio": 243.33891843219902,
+        "efficiency": 2.43338918432199,
+        "interpretation": "superlinear"
+      },
+      {
+        "num_gpus": 100,
+        "gpu_ratio": 100.0,
+        "qps_ratio": 243.33891843219902,
+        "efficiency": 2.43338918432199,
+        "interpretation": "superlinear"
+      }
+    ],
+    "bottleneck_analysis": {
+      "detected": true,
+      "details": {
+        "gpu_count": 1,
+        "qps_gain_pct": 0.0,
+        "likely_cause": "scheduling_overhead"
+      },
+      "max_qps": 48.08683836435157,
+      "optimal_gpu_count": 100
+    }
+  },
+  "step3_kbins_sensitivity": {
+    "k_values": [
+      1,
+      2,
+      8,
+      16,
+      32
+    ],
+    "sla_violations_pct": [
+      28.520200000000003,
+      11.4629,
+      9.5013,
+      8.7251,
+      8.373700000000001
+    ],
+    "capacity_qps": [
+      38.52567478503753,
+      47.71909715766337,
+      48.77634638973075,
+      49.194697151318586,
+      49.38409222684289
+    ],
+    "avg_latency_sec": [
+      2.141633869484641,
+      0.6504015984528688,
+      0.5782013716409554,
+      0.5841243581430907,
+      0.6113271336452392
+    ],
+    "p95_latency_sec": [
+      11.268987999997524,
+      3.216686452374498,
+      1.9599286000036946,
+      1.7249216000004686,
+      1.5601200000000972
+    ],
+    "gpu_utilization_pct": [
+      12.754999980697379,
+      12.455599634262635,
+      12.421680858848218,
+      12.441471657972766,
+      12.489756899584057
+    ],
+    "optimal_k": {
+      "k_bins": 32,
+      "sla_violations_pct": 8.373700000000001,
+      "capacity_qps": 49.38409222684289,
+      "avg_latency_sec": 0.6113271336452392,
+      "num_gpus": 100
+    },
+    "interpretation": {
+      "best_k": 32,
+      "performance_range": {
+        "min_qps": 38.52567478503753,
+        "max_qps": 49.38409222684289,
+        "variance_pct": 21.98768257585431
+      }
+    }
+  },
+  "scheduler_comparison": {
+    "1,000_requests": {
+      "static_fifo": {
+        "sla_violations_pct": 81.89999999999999,
+        "capacity_qps": 0.7213585190697492,
+        "avg_latency_sec": 7.4221261404284276,
+        "p95_latency_sec": 20.397260571428404,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 50.7644633913185
+      },
+      "dynamic_no_bins": {
+        "sla_violations_pct": 69.6,
+        "capacity_qps": 1.2288560561187516,
+        "avg_latency_sec": 3.447039027456731,
+        "p95_latency_sec": 11.262948845454586,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 48.19246209413413
+      },
+      "multi_bin_dynamic": {
+        "sla_violations_pct": 61.3,
+        "capacity_qps": 1.5052056291662266,
+        "avg_latency_sec": 4.178574633808832,
+        "p95_latency_sec": 24.58464794032619,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 52.366515471720575
+      },
+      "multi_bin_vs_static_fifo": {
+        "sla_improvement_pct": 25.152625152625145,
+        "qps_improvement_ratio": 2.086626260555309,
+        "latency_reduction_pct": 43.70110996836774
+      },
+      "multi_bin_vs_dynamic_no_bins": {
+        "sla_improvement_pct": 11.925287356321835,
+        "qps_improvement_ratio": 1.2248835994024427,
+        "latency_reduction_pct": -21.222144586272286
+      }
+    },
+    "10,000_requests": {
+      "static_fifo": {
+        "sla_violations_pct": 91.01,
+        "capacity_qps": 0.5639415620919684,
+        "avg_latency_sec": 24.96845987675699,
+        "p95_latency_sec": 72.0513135714286,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 71.0604209135882
+      },
+      "dynamic_no_bins": {
+        "sla_violations_pct": 81.98,
+        "capacity_qps": 1.1284739571980902,
+        "avg_latency_sec": 4.484418881226862,
+        "p95_latency_sec": 12.405127632662087,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 65.68558880954201
+      },
+      "multi_bin_dynamic": {
+        "sla_violations_pct": 68.27,
+        "capacity_qps": 1.9782810163655433,
+        "avg_latency_sec": 30.772124963870727,
+        "p95_latency_sec": 156.9132046755171,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 85.91436387887627
+      },
+      "multi_bin_vs_static_fifo": {
+        "sla_improvement_pct": 24.986265245577417,
+        "qps_improvement_ratio": 3.507953925273772,
+        "latency_reduction_pct": -23.243985074611416
+      },
+      "multi_bin_vs_dynamic_no_bins": {
+        "sla_improvement_pct": 16.723591119785322,
+        "qps_improvement_ratio": 1.7530586361757567,
+        "latency_reduction_pct": -586.2009499757522
+      }
+    },
+    "100,000_requests": {
+      "static_fifo": {
+        "sla_violations_pct": 97.82600000000001,
+        "capacity_qps": 0.2624426662940481,
+        "avg_latency_sec": 1283.3010244411919,
+        "p95_latency_sec": 3862.265365000261,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 88.56982133446274
+      },
+      "dynamic_no_bins": {
+        "sla_violations_pct": 96.53399999999999,
+        "capacity_qps": 0.2917524937924214,
+        "avg_latency_sec": 2065.048532912454,
+        "p95_latency_sec": 7403.16562978298,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 89.94772569624529
+      },
+      "multi_bin_dynamic": {
+        "sla_violations_pct": 90.692,
+        "capacity_qps": 0.8249527849243413,
+        "avg_latency_sec": 611.2829254353561,
+        "p95_latency_sec": 4627.8617369733765,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 96.81929296573911
+      },
+      "multi_bin_vs_static_fifo": {
+        "sla_improvement_pct": 7.292539815590962,
+        "qps_improvement_ratio": 3.1433638309406637,
+        "latency_reduction_pct": 52.36636503882347
+      },
+      "multi_bin_vs_dynamic_no_bins": {
+        "sla_improvement_pct": 6.0517537862307575,
+        "qps_improvement_ratio": 2.8275774928295414,
+        "latency_reduction_pct": 70.39861699651053
+      }
+    },
+    "1,000,000_requests": {
+      "static_fifo": {
+        "sla_violations_pct": 99.7825,
+        "capacity_qps": 0.026642275999356233,
+        "avg_latency_sec": 32118.889782130544,
+        "p95_latency_sec": 60599.17475499878,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 98.83994591967019
+      },
+      "dynamic_no_bins": {
+        "sla_violations_pct": 99.6539,
+        "capacity_qps": 0.01805507996994825,
+        "avg_latency_sec": 80752.32690867822,
+        "p95_latency_sec": 166241.87567657686,
+        "num_gpus": 1,
+        "gpu_utilization_pct": 99.37699002460765
+      }
+    }
+  },
+  "key_findings": [
+    "Multi-bin achieves 3.3% SLA violations with 1,000 requests on 4 GPUs",
+    "GPU scaling saturates at ~1 GPUs (0.20 QPS with 1 GPUs)",
+    "Scaling from 1 to 100 GPUs: 243.34x QPS improvement (243% efficiency)",
+    "Optimal K-bins: 32 (49.38 QPS, 8.4% SLA violations)",
+    "K-bins sensitivity: 22.0% performance variance across K=[1,2,4,8,16,32]"
+  ]
+}

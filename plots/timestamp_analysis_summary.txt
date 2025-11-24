@@ -1,0 +1,53 @@
+
+================================================================================
+BURSTGPT TIMESTAMP & ARRIVAL RATE ANALYSIS SUMMARY
+================================================================================
+
+Dataset: 1,429,737 requests
+Time Range: 5269973.00s (1463.88 hours)
+
+INTER-ARRIVAL TIME STATISTICS:
+  Mean: 3.686s
+  Median: 1.000s
+  Std Dev: 48.957s
+  Min: 0.000000s
+  Max: 15240.000s
+  P95: 12.000s
+  P99: 52.000s
+
+ARRIVAL RATE (REAL TIMESTAMPS):
+  Average: 0.271299 req/s
+  Average: 16.2779 req/min
+  Average: 976.68 req/hour
+
+BURSTINESS (60s windows):
+  Mean rate: 0.271298 req/s
+  Peak rate: 20.833333 req/s
+  Min rate: 0.000000 req/s
+  Coefficient of Variation: 2.91
+  Burst periods (>mean+2σ): 3.4%
+  Quiet periods (<mean-σ): 0.0%
+
+RPS SCALING COMPARISON (factor: 200.0x):
+  Real duration: 1463.88 hours
+  Scaled duration: 439.16 minutes
+  Compression: 200.0x faster
+
+  Real avg rate: 0.271299 req/s
+  Scaled avg rate: 54.260 req/s
+  Rate increase: 200.0x higher
+
+KEY INSIGHTS:
+  ✓ Real timestamps preserve natural bursty patterns from Azure production
+  ✓ Arrival rate is very low (~0.2713 req/s), not high-pressure
+  ✓ Burstiness exists but overall load is manageable
+  ✓ RPS scaling creates artificial high-pressure for stress testing
+  ✓ Real timestamps better for realistic benchmarking
+  ✓ RPS scaling better for finding scheduler breaking points
+
+PLOTS GENERATED:
+  1. plots/inter_arrival_time_analysis.png
+  2. plots/arrival_rate_over_time.png
+  3. plots/real_vs_rps_scaled_comparison.png
+
+================================================================================

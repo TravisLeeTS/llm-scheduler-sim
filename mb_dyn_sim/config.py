@@ -1,5 +1,7 @@
 """
-Configuration for the multi-bin dynamic scheduler (paper-faithful).
+Configuration for Multi-Bin + Dynamic Batching scheduler.
+
+Level 4 Production Configuration: Real BurstGPT workload + GPU-calibrated latency
 """
 
 from dataclasses import dataclass, field
@@ -9,67 +11,66 @@ import numpy as np
 
 @dataclass
 class SchedulerConfig:
-    """Configuration for the multi-bin dynamic scheduler (paper-faithful)."""
+    """
+    Configuration for Multi-Bin + Dynamic Batching scheduler.
     
-    # Logical cloud-style number of GPUs (simulated)
-    NUM_GPUS: int = 1      # Configurable X, default 1 for local RTX 4080
+    This implements the hybrid approach combining:
+    - Multi-Bin Batching (Guldogan et al.): Bins for batch composition efficiency
+    - SLA-Constrained Dynamic Batching: Adaptive batch sizing with feedback control
     
-    # Number of multi-bin queues (global bins)
-    K_BINS: int = 4        # Configurable X (e.g., 1, 2, 4, 8)
+    Level 4 Production Mode (Default):
+    - BurstGPT dataset arrivals (real Azure traces)
+    - GPU-calibrated latency model (Qwen3 1.7B on RTX 4080)
+    - Stress testing mode: 200x RPS scaling (0.27→54 req/s) for high-pressure evaluation
+    - Real timestamps available via USE_REAL_TIMESTAMPS=True for realistic benchmarking
+    - Demonstrates clear scheduler differences under load
+    """
     
-    # Bin boundaries for predicted output length (tokens)
-    # Each tuple is (min_tokens, max_tokens) for that bin
+    # ===== GPU Infrastructure =====
+    NUM_GPUS: int = 4              # Number of parallel GPUs (4 for high-pressure testing)
+    M_MAX_GB: float = 12.0         # GPU memory capacity (RTX 4080: 12GB)
+    M_MODEL_GB: float = 2.0        # Model VRAM footprint (Qwen 1.7B)
+    KV_MEM_PER_TOKEN_GB: float = 5e-6  # KV cache memory per token
+    
+    # ===== Multi-Bin Configuration (Paper-Faithful) =====
+    K_BINS: int = 4                # Number of bins for length-based batching (modest)
+    USE_EQUAL_MASS_BINS: bool = True  # Equal probability mass per bin (Lemma 4.1)
     BIN_BOUNDARIES: List[Tuple[int, int]] = field(default_factory=lambda: [
-        (0, 64),        # short
-        (64, 256),      # medium
-        (256, 1024),    # long
-        (1024, 10000),  # very long
+        (0, 64),        # Bin 0: short outputs
+        (64, 256),      # Bin 1: medium outputs
+        (256, 1024),    # Bin 2: long outputs
+        (1024, 10000),  # Bin 3: very long outputs
     ])
+    BIN_SELECTION_POLICY: str = "round_robin"  # "round_robin" or "longest_queue"
     
-    # Equal-mass bin boundaries (paper requirement)
-    USE_EQUAL_MASS_BINS: bool = True  # Use empirical quantiles for bin boundaries
-    
-    # SLA and resource parameters
-    D_SLA: float = 1.0             # seconds
-    M_MAX_GB: float = 12.0         # RTX 4080 12GB
-    M_MODEL_GB: float = 2.0        # approx VRAM footprint for Qwen3-0.6B
-    KV_MEM_PER_TOKEN_GB: float = 5e-6  # rough KV cache per token
-    
-    # Dynamic batching behavior
-    MAX_CANDIDATES: int = 64
-    BASE_LATENCY: float = 0.01     # base compute latency in seconds
-    MEMORY_MARGIN_GB: float = 1.0
-    LATENCY_EPSILON: float = 0.05
-    
-    # Dynamic batching constraints (Algorithm 1 & 2 from paper)
+    # ===== Dynamic Batching Parameters =====
     B_MIN: int = 1                 # Minimum batch size
     B_MAX: int = 128               # Maximum batch size
+    MAX_CANDIDATES: int = 128      # Candidate pool size per GPU scheduling (match B_MAX)
     
-    # Experiment mode (paper-faithful)
-    EXPERIMENT_MODE: str = "multi_bin_dynamic"  # "multi_bin_only", "dynamic_only", "multi_bin_dynamic"
-    B_FIXED: int = 32              # Fixed batch size for multi_bin_only mode
+    # ===== SLA Constraints (Realistic for LLM Inference) =====
+    D_SLA: float = 1.0             # SLA deadline (seconds) - realistic for production LLM inference
+    LATENCY_EPSILON: float = 0.1   # SLA tolerance band
+    MEMORY_MARGIN_GB: float = 1.0  # Safety margin for memory constraint
     
-    # Workload parameters
-    NUM_REQUESTS: int = 20000
-    SEED: int = 42
-    ARRIVAL_PROFILE: str = "burstgpt_like"  # "poisson", "burstgpt_like", "burstgpt_dataset"
+    # ===== Workload Configuration (High-Pressure Production) =====
+    NUM_REQUESTS: int = 10000      # Number of requests to simulate (10K for realistic testing)
+    SEED: int = 42                 # Random seed for reproducibility
     
-    # Poisson arrival parameters (for poisson mode)
-    POISSON_LAMBDA: float = 50.0   # requests/second
+    # Level 4: BurstGPT dataset only (real Azure ChatGPT traces)
+    WORKLOAD_SOURCE: str = "burstgpt_dataset"  # Level 4 production mode
+    DATASET_PATH: str = "data/BurstGPT_sample.csv"
+    USE_REAL_TIMESTAMPS: bool = False  # False=RPS scaling (stress testing), True=real timestamps (realistic benchmarking)
+    RPS_SCALING: float = 200.0         # RPS scaling factor (200x = 0.27→54 req/s for stress testing)
     
-    # BurstGPT dataset parameters
-    DATASET_PATH: str = ""         # Path to BurstGPT dataset CSV
-    WORKLOAD_SOURCE: str = "synthetic"  # "synthetic" or "burstgpt_dataset"
-    RPS_SCALING: float = 1.0       # RPS scaling factor for BurstGPT dataset
+    # Experiment mode (for compatibility)
+    EXPERIMENT_MODE: str = "multi_bin_dynamic"
+    B_FIXED: int = 32              # Fixed batch size (for multi_bin_only mode)
+    USE_REAL_MODEL: bool = False   # Use vLLM (deprecated - use USE_REAL_CALIBRATION)
     
-    # Bin selection policy
-    BIN_SELECTION_POLICY: str = "round_robin"  # or "longest_queue"
-    
-    # Model calibration
-    USE_REAL_MODEL: bool = False   # Use vLLM with Qwen3-0.6B for real latency
-    CALIBRATE_ON_STARTUP: bool = False  # Run calibration on startup
-    USE_REAL_CALIBRATION: bool = False  # Use real GPU calibration data
-    CALIBRATION_CSV_PATH: str = ""  # Path to calibration CSV (if USE_REAL_CALIBRATION=True)
+    # ===== GPU Calibration (Level 4 Production) =====
+    USE_REAL_CALIBRATION: bool = True  # Use real GPU calibration data (Level 4 default)
+    CALIBRATION_CSV_PATH: str = "data/qwen3_1_7b_latency_grid.csv"  # RTX 4080 measurements
     
     def __post_init__(self):
         """Validate configuration after initialization."""
@@ -86,6 +87,23 @@ class SchedulerConfig:
         
         if self.K_BINS < 1:
             raise ValueError("K_BINS must be >= 1")
+    
+    def get_batch_composition_stats(self) -> dict:
+        """
+        Get statistics about batch composition efficiency from Multi-Bin paper.
+        
+        Returns:
+            Dictionary with bin range statistics for throughput analysis
+        """
+        stats = {}
+        for i, (min_len, max_len) in enumerate(self.BIN_BOUNDARIES):
+            range_size = max_len - min_len if max_len != 10000 else "unbounded"
+            stats[f"bin_{i}"] = {
+                "range": (min_len, max_len),
+                "range_size": range_size,
+                "purpose": f"Reduce E[max(t_j) | bin] via narrower intervals"
+            }
+        return stats
 
 
 def compute_equal_mass_boundaries(predicted_lengths: List[int], k_bins: int) -> List[Tuple[int, int]]:

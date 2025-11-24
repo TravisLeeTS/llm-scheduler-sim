@@ -1,9 +1,13 @@
 """
 Metrics computation and analysis.
+
+Paper-specific metrics:
+- Multi-Bin Batching Paper: tokens_per_second, capacity_threshold_lambda, throughput_improvement
+- Dynamic Batching Paper: decode_step_time, request_rate_qps, capacity_qps_under_SLA
 """
 
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Optional
 from .workload import Request
 
 
@@ -71,6 +75,30 @@ def compute_metrics(requests: List[Request]) -> Dict:
     avg_queueing_delay = np.mean(queueing_delays) if queueing_delays else 0.0
     avg_service_time = np.mean(service_times) if service_times else 0.0
     
+    # Calculate additional paper-specific metrics
+    total_output_tokens = sum(r.output_len for r in completed)
+    avg_output_tokens = total_output_tokens / num_requests if num_requests > 0 else 0.0
+    
+    # Seconds per generated token (Dynamic Batching paper metric)
+    seconds_per_generated_token = total_time / total_output_tokens if total_output_tokens > 0 else 0.0
+    
+    # Decode step time (average service time per token in batch)
+    # Approximation: avg_service_time / avg_output_tokens
+    decode_step_time_ms = (avg_service_time / avg_output_tokens * 1000) if avg_output_tokens > 0 else 0.0
+    
+    # Request rate (QPS) = requests per second
+    request_rate_qps = throughput_requests_per_sec
+    
+    # Capacity under SLA: requests/sec that meet SLA
+    requests_meeting_sla = num_requests - violations
+    capacity_qps_under_sla = requests_meeting_sla / total_time if total_time > 0 else 0.0
+    
+    # Capacity threshold lambda (Multi-Bin paper metric)
+    # Maximum sustainable arrival rate before SLA violations exceed threshold
+    # Approximation: current request rate adjusted by SLA violation headroom
+    sla_headroom = max(0.05 - sla_violation_rate, 0.0)  # Assume 5% violation threshold
+    capacity_threshold_lambda = throughput_requests_per_sec * (1 + sla_headroom / 0.05) if sla_violation_rate < 0.05 else throughput_requests_per_sec
+    
     return {
         'num_requests': num_requests,
         'throughput_tokens_per_sec': throughput_tokens_per_sec,
@@ -85,6 +113,20 @@ def compute_metrics(requests: List[Request]) -> Dict:
         'avg_service_time': avg_service_time,
         'total_tokens': total_tokens,
         'total_time': total_time,
+        
+        # Multi-Bin Batching Paper Metrics
+        'tokens_per_second': throughput_tokens_per_sec,  # Alias for clarity
+        'requests_per_second': throughput_requests_per_sec,  # Alias for clarity
+        'average_latency_seconds': avg_latency,  # Alias for clarity
+        'capacity_threshold_lambda': capacity_threshold_lambda,
+        'seconds_per_generated_token': seconds_per_generated_token,
+        
+        # Dynamic Batching Paper Metrics
+        'decode_step_time_ms': decode_step_time_ms,
+        'request_rate_qps': request_rate_qps,
+        'capacity_qps_under_sla': capacity_qps_under_sla,
+        'total_output_tokens': total_output_tokens,
+        'avg_output_tokens_per_request': avg_output_tokens,
     }
 
 
@@ -117,47 +159,225 @@ def compute_gpu_utilization(gpu_stats: List[Dict]) -> Dict:
     }
 
 
-def print_metrics_table(metrics: Dict, gpu_metrics: Dict, scheduler_name: str) -> None:
+def compute_comparative_metrics(
+    test_metrics: Dict,
+    baseline_metrics: Dict,
+) -> Dict:
     """
-    Print a formatted table of metrics.
+    Compute improvement metrics vs baseline (paper-specific).
+    
+    For Multi-Bin Paper:
+    - throughput_improvement_vs_baseline_percent
+    
+    For Dynamic Batching Paper:
+    - throughput_improvement_percent_vs_static
+    - capacity_improvement_percent_vs_static
+    
+    Args:
+        test_metrics: Metrics from test scheduler (e.g., multi_bin_dynamic or dynamic_no_bins)
+        baseline_metrics: Metrics from baseline scheduler (e.g., static_fifo)
+    
+    Returns:
+        Dictionary with improvement percentages
+    """
+    improvements = {}
+    
+    # Throughput improvement
+    if baseline_metrics['throughput_tokens_per_sec'] > 0:
+        throughput_improvement = (
+            (test_metrics['throughput_tokens_per_sec'] - baseline_metrics['throughput_tokens_per_sec']) 
+            / baseline_metrics['throughput_tokens_per_sec'] * 100
+        )
+        improvements['throughput_improvement_vs_baseline_percent'] = throughput_improvement
+        improvements['throughput_improvement_percent_vs_static'] = throughput_improvement  # Alias
+    
+    # Capacity improvement (requests meeting SLA)
+    if baseline_metrics['capacity_qps_under_sla'] > 0:
+        capacity_improvement = (
+            (test_metrics['capacity_qps_under_sla'] - baseline_metrics['capacity_qps_under_sla'])
+            / baseline_metrics['capacity_qps_under_sla'] * 100
+        )
+        improvements['capacity_improvement_percent_vs_static'] = capacity_improvement
+    
+    # Latency improvement (lower is better, so invert)
+    if baseline_metrics['avg_latency'] > 0:
+        latency_improvement = (
+            (baseline_metrics['avg_latency'] - test_metrics['avg_latency'])
+            / baseline_metrics['avg_latency'] * 100
+        )
+        improvements['latency_improvement_percent'] = latency_improvement
+    
+    # SLA violation reduction (lower is better)
+    if baseline_metrics['sla_violation_rate'] > 0:
+        sla_reduction = (
+            (baseline_metrics['sla_violation_rate'] - test_metrics['sla_violation_rate'])
+            / baseline_metrics['sla_violation_rate'] * 100
+        )
+        improvements['sla_violation_reduction_percent'] = sla_reduction
+    
+    return improvements
+
+
+def estimate_memory_usage(
+    batch_size: int,
+    avg_sequence_length: int,
+    kv_cache_per_token_gb: float = 5e-6,
+    model_size_gb: float = 2.0,
+) -> Dict:
+    """
+    Estimate memory usage for a batch (Dynamic Batching paper metric).
+    
+    Args:
+        batch_size: Number of requests in batch
+        avg_sequence_length: Average total sequence length (prompt + output)
+        kv_cache_per_token_gb: KV cache memory per token in GB
+        model_size_gb: Model size in GB
+    
+    Returns:
+        Dictionary with memory estimates
+    """
+    # KV cache memory for batch
+    total_tokens = batch_size * avg_sequence_length
+    kv_cache_gb = total_tokens * kv_cache_per_token_gb
+    
+    # Total memory
+    total_memory_gb = model_size_gb + kv_cache_gb
+    
+    return {
+        'batch_size': batch_size,
+        'total_tokens_in_batch': total_tokens,
+        'kv_cache_memory_gb': kv_cache_gb,
+        'model_memory_gb': model_size_gb,
+        'total_memory_gb': total_memory_gb,
+        'memory_tokens_used': total_tokens,  # For paper metric naming
+    }
+
+
+def compute_batch_statistics(requests: List[Request]) -> Dict:
+    """
+    Compute batch-level statistics from completed requests.
+    
+    This extracts information about how requests were batched together,
+    useful for analyzing batch composition efficiency.
+    
+    Args:
+        requests: List of completed requests
+    
+    Returns:
+        Dictionary with batch statistics
+    """
+    if not requests:
+        return {
+            'num_batches': 0,
+            'avg_batch_size': 0.0,
+            'min_batch_size': 0,
+            'max_batch_size': 0,
+            'std_batch_size': 0.0,
+        }
+    
+    # Group requests by their service start time (same time = same batch)
+    from collections import defaultdict
+    batches = defaultdict(list)
+    
+    for req in requests:
+        if req.start_service_time >= 0:
+            # Use GPU and start time to uniquely identify batch
+            batch_key = (req.assigned_gpu, round(req.start_service_time, 6))
+            batches[batch_key].append(req)
+    
+    batch_sizes = [len(batch) for batch in batches.values()]
+    
+    if not batch_sizes:
+        return {
+            'num_batches': 0,
+            'avg_batch_size': 0.0,
+            'min_batch_size': 0,
+            'max_batch_size': 0,
+            'std_batch_size': 0.0,
+        }
+    
+    return {
+        'num_batches': len(batch_sizes),
+        'avg_batch_size': np.mean(batch_sizes),
+        'min_batch_size': np.min(batch_sizes),
+        'max_batch_size': np.max(batch_sizes),
+        'std_batch_size': np.std(batch_sizes),
+    }
+
+
+def print_metrics_table(
+    metrics: Dict, 
+    gpu_metrics: Dict, 
+    scheduler_name: str,
+    baseline_metrics: Optional[Dict] = None,
+    show_paper_metrics: bool = True,
+) -> None:
+    """
+    Print a formatted table of metrics with paper-specific metrics.
     
     Args:
         metrics: Request metrics dictionary
         gpu_metrics: GPU utilization metrics dictionary
         scheduler_name: Name of the scheduler for display
+        baseline_metrics: Optional baseline metrics for computing improvements
+        show_paper_metrics: Whether to show paper-specific metrics
     """
-    print(f"\n{'='*70}")
+    print(f"\n{'='*80}")
     print(f"Scheduler: {scheduler_name}")
-    print(f"{'='*70}")
+    print(f"{'='*80}")
     
-    print(f"\nThroughput:")
-    print(f"  Requests/sec:  {metrics['throughput_requests_per_sec']:.2f}")
-    print(f"  Tokens/sec:    {metrics['throughput_tokens_per_sec']:.2f}")
+    print(f"\n[Core Performance Metrics]")
+    print(f"  Requests/sec:        {metrics['throughput_requests_per_sec']:.2f}")
+    print(f"  Tokens/sec:          {metrics['throughput_tokens_per_sec']:.2f}")
     
-    print(f"\nLatency (seconds):")
-    print(f"  Average:       {metrics['avg_latency']:.4f}")
-    print(f"  P50:           {metrics['p50_latency']:.4f}")
-    print(f"  P95:           {metrics['p95_latency']:.4f}")
-    print(f"  P99:           {metrics['p99_latency']:.4f}")
-    print(f"  Max:           {metrics['max_latency']:.4f}")
+    print(f"\n[Latency (seconds)]")
+    print(f"  Average:             {metrics['avg_latency']:.4f}")
+    print(f"  P50:                 {metrics['p50_latency']:.4f}")
+    print(f"  P95:                 {metrics['p95_latency']:.4f}")
+    print(f"  P99:                 {metrics['p99_latency']:.4f}")
+    print(f"  Max:                 {metrics['max_latency']:.4f}")
     
-    print(f"\nSLA Performance:")
-    print(f"  Violation rate: {metrics['sla_violation_rate']*100:.2f}%")
+    print(f"\n[SLA Performance]")
+    print(f"  Violation rate:      {metrics['sla_violation_rate']*100:.2f}%")
+    print(f"  Requests meeting SLA: {metrics['num_requests'] - int(metrics['num_requests'] * metrics['sla_violation_rate'])}")
     
-    print(f"\nQueue Statistics:")
-    print(f"  Avg queueing delay: {metrics['avg_queueing_delay']:.4f}s")
-    print(f"  Avg service time:   {metrics['avg_service_time']:.4f}s")
+    print(f"\n[Queue Statistics]")
+    print(f"  Avg queueing delay:  {metrics['avg_queueing_delay']:.4f}s")
+    print(f"  Avg service time:    {metrics['avg_service_time']:.4f}s")
     
-    print(f"\nGPU Utilization:")
-    print(f"  Num GPUs:      {gpu_metrics['num_gpus']}")
-    print(f"  Average:       {gpu_metrics['avg_utilization']*100:.2f}%")
+    print(f"\n[GPU Utilization]")
+    print(f"  Num GPUs:            {gpu_metrics['num_gpus']}")
+    print(f"  Average:             {gpu_metrics['avg_utilization']*100:.2f}%")
     if gpu_metrics['num_gpus'] > 1:
-        print(f"  Min:           {gpu_metrics['min_utilization']*100:.2f}%")
-        print(f"  Max:           {gpu_metrics['max_utilization']*100:.2f}%")
+        print(f"  Min:                 {gpu_metrics['min_utilization']*100:.2f}%")
+        print(f"  Max:                 {gpu_metrics['max_utilization']*100:.2f}%")
     
-    print(f"\nWorkload:")
-    print(f"  Total requests: {metrics['num_requests']}")
-    print(f"  Total tokens:   {metrics['total_tokens']}")
-    print(f"  Simulation time: {metrics['total_time']:.2f}s")
+    print(f"\n[Workload]")
+    print(f"  Total requests:      {metrics['num_requests']}")
+    print(f"  Total tokens:        {metrics['total_tokens']:,}")
+    print(f"  Output tokens:       {metrics['total_output_tokens']:,}")
+    print(f"  Simulation time:     {metrics['total_time']:.2f}s")
     
-    print(f"{'='*70}\n")
+    if show_paper_metrics:
+        print(f"\n[Multi-Bin Batching Paper Metrics]")
+        print(f"  Tokens/second:                   {metrics['tokens_per_second']:.2f}")
+        print(f"  Requests/second:                 {metrics['requests_per_second']:.2f}")
+        print(f"  Average latency (seconds):       {metrics['average_latency_seconds']:.4f}")
+        print(f"  Capacity threshold lambda:       {metrics['capacity_threshold_lambda']:.2f} req/s")
+        print(f"  Seconds per generated token:     {metrics['seconds_per_generated_token']:.6f}")
+        
+        print(f"\n[Dynamic Batching Paper Metrics]")
+        print(f"  Decode step time:                {metrics['decode_step_time_ms']:.2f} ms")
+        print(f"  Request rate (QPS):              {metrics['request_rate_qps']:.2f}")
+        print(f"  Capacity QPS under SLA:          {metrics['capacity_qps_under_sla']:.2f}")
+        print(f"  Avg output tokens/request:       {metrics['avg_output_tokens_per_request']:.1f}")
+    
+    if baseline_metrics is not None:
+        improvements = compute_comparative_metrics(metrics, baseline_metrics)
+        print(f"\n[Improvement vs Baseline - static_fifo]")
+        print(f"  Throughput improvement:          {improvements.get('throughput_improvement_vs_baseline_percent', 0):.2f}%")
+        print(f"  Capacity improvement:            {improvements.get('capacity_improvement_percent_vs_static', 0):.2f}%")
+        print(f"  Latency improvement:             {improvements.get('latency_improvement_percent', 0):.2f}%")
+        print(f"  SLA violation reduction:         {improvements.get('sla_violation_reduction_percent', 0):.2f}%")
+    
+    print(f"{'='*80}\n")
