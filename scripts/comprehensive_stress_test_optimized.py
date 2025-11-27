@@ -151,7 +151,7 @@ def run_single_test(
     d_sla: float,
     dataset_path: str,
     calibration_csv: str,
-    k_bins: int = 4,
+    k_bins: int = 8,
     show_progress: bool = True
 ) -> dict:
     """
@@ -349,7 +349,7 @@ def step1_request_scaling(args, all_results):
                     d_sla=args.d_sla,
                     dataset_path=args.dataset,
                     calibration_csv=args.calibration,
-                    k_bins=4,
+                    k_bins=1,  # Baseline schedulers don't use bins
                     show_progress=False
                 )
                 all_results.append(result)
@@ -367,7 +367,7 @@ def step1_request_scaling(args, all_results):
                     d_sla=args.d_sla,
                     dataset_path=args.dataset,
                     calibration_csv=args.calibration,
-                    k_bins=4,
+                    k_bins=8,
                     show_progress=False
                 )
                 all_results.append(result)
@@ -400,7 +400,7 @@ def step2_gpu_scaling(args, all_results):
                 d_sla=args.d_sla,
                 dataset_path=args.dataset,
                 calibration_csv=args.calibration,
-                k_bins=4,
+                k_bins=8,
                 show_progress=False
             )
             all_results.append(result)
@@ -491,11 +491,11 @@ def save_results_to_csv_smart(all_results, output_path):
     
     step2_df = combined_df[(combined_df['scheduler_type'] == 'multi_bin_dynamic') & 
                           (combined_df['num_requests'] == 1_000_000) &
-                          (combined_df['k_bins'] == 4)]
+                          (combined_df['k_bins'] == 8)]
     
     step3_df = combined_df[(combined_df['scheduler_type'] == 'multi_bin_dynamic') & 
                           (combined_df['num_requests'] == 1_000_000) &
-                          (combined_df['k_bins'] != 4)]
+                          (combined_df['k_bins'] != 8)]
     
     # Save all files
     step1_df.to_csv(step1_path, index=False)
@@ -587,7 +587,7 @@ def main():
         step2_results = [r for r in all_results 
                         if r['scheduler_type'] == 'multi_bin_dynamic' 
                         and r['num_requests'] == 1_000_000
-                        and r.get('k_bins', 4) == 4
+                        and r.get('k_bins', 8) == 8
                         and r['status'] == 'success']
         
         if args.best_gpu_count:

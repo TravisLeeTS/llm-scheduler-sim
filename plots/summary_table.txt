@@ -3,10 +3,10 @@ COMPREHENSIVE STRESS TEST RESULTS SUMMARY
 ========================================================================================================================
 
         Scheduler  Requests  GPUs Capacity QPS SLA Violations Avg Latency P95 Latency Throughput GPU Util Avg Batch
-multi_bin_dynamic     1,000     1         1.51          61.3%       4.18s      24.58s       3.89    52.4%       3.0
-multi_bin_dynamic    10,000     1         1.98          68.3%      30.77s     156.91s       6.23    85.9%       3.3
-multi_bin_dynamic   100,000     1         0.82          90.7%     611.28s    4627.86s       8.86    96.8%       6.3
-multi_bin_dynamic 1,000,000    32        14.99          72.2%     130.87s     443.90s      53.90    34.6%       1.7
+multi_bin_dynamic     1,000     1         1.51          61.0%       4.18s      24.58s       3.89    52.0%       3.0
+multi_bin_dynamic    10,000     1         1.98          68.0%      30.77s     156.91s       6.23    86.0%       3.3
+multi_bin_dynamic   100,000     1         0.82          91.0%     611.28s    4627.86s       8.86    97.0%       6.3
+multi_bin_dynamic 1,000,000     1         0.20          97.0%   26824.65s  115012.73s       7.06   100.0%       4.3
       static_fifo     1,000     1         0.72          81.9%       7.42s      20.40s       3.99    50.8%       4.3
       static_fifo    10,000     1         0.56          91.0%      24.97s      72.05s       6.27    71.1%       5.8
       static_fifo   100,000     1         0.26          97.8%    1283.30s    3862.27s      12.07    88.6%       7.3

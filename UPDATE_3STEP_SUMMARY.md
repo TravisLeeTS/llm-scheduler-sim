@@ -196,3 +196,60 @@ python scripts/comprehensive_stress_test.py --max-requests 1000000 --max-gpus 64
 ✅ Backward compatible with old usage  
 ✅ Documentation created and updated  
 ✅ Ready for production use
+
+## Latest Update: K-Bins Performance Analysis (Nov 24, 2025)
+
+**New Document**: [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md)
+
+After running the optimized comprehensive stress test, a detailed analysis was conducted on Step 3 results:
+
+### Key Findings
+
+1. **Optimal K Value**: K=8 or K=16 (best performance/complexity trade-off)
+   - K=1→K=2: Dramatic 70% latency reduction, 24% QPS improvement
+   - K=2→K=8: Continued gains, 27% better QPS than K=1
+   - K>16: Diminishing returns (<1% QPS gain per doubling)
+
+2. **SLA Metrics: Two Measurement Spaces**:
+   - **No paradox**: 8% violation rate with p95 > deadline is mathematically consistent
+   - SLA violations: Measured in normalized space (per-token)
+   - Percentile latencies: Measured in raw seconds
+   - When violation_rate > 5%, expect p95 > deadline (p95 falls in violation tail)
+   - Long requests (2000 tokens) can take 15s and still meet normalized SLA
+
+3. **Long-Tail Problem Persists**:
+   - P99 latencies remain high (10-13s) regardless of K value
+   - Caused by stragglers (inherently slow requests) and bursty arrivals
+   - K-bins helps average latency but cannot eliminate outliers
+   - Future work: Straggler detection and preemption
+
+4. **Batch Dynamics**:
+   - Average batch size: 1.18-1.23 (very small, consistent across K)
+   - Confirms SLA controller is aggressively limiting batches
+   - This is **correct behavior** for SLA-constrained serving
+   - Small batches = lower latency per request
+
+5. **GPU Utilization**:
+   - Stays ~12.4-12.8% across all K values
+   - Expected: 100 GPUs, ~50 QPS → ~15% theoretical utilization
+   - Low utilization = spare capacity for SLA guarantees (not inefficiency)
+
+### Recommendations
+
+**For Production**:
+- Use K=8 or K=16 (optimal range)
+- Expect ~10% SLA violations (inherent to bursty workloads)
+- Monitor per-token latency metrics, not just absolute latency
+
+**For Research Papers**:
+- Report both SLA violation rate AND p95/p99 latencies
+- Clarify per-token vs per-request SLA calculation
+- Highlight K-bins sensitivity (K=1→K=2 dramatic, K>16 diminishing)
+- Discuss long-tail problem as future work
+
+**For Future Optimization**:
+- Adaptive K-bins (adjust based on load)
+- Straggler detection and preemption
+- Per-bin GPU affinity
+- Hybrid SLA policies (strict for short requests, per-token for long)
+

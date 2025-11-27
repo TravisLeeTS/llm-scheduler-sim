@@ -1,17 +1,15 @@
 ================================================================================
 COMPREHENSIVE STRESS TEST ANALYSIS REPORT
 ================================================================================
-Generated: 2025-11-24 18:53:38
-Total configurations tested: 33
+Generated: 2025-11-24 20:31:20
+Total configurations tested: 46
 
 
 KEY FINDINGS:
 --------------------------------------------------------------------------------
-  • Multi-bin achieves 3.3% SLA violations with 1,000 requests on 4 GPUs
-  • GPU scaling saturates at ~1 GPUs (0.20 QPS with 1 GPUs)
-  • Scaling from 1 to 100 GPUs: 243.34x QPS improvement (243% efficiency)
+  • Multi-bin achieves 3.6% SLA violations with 1,000 requests on 4 GPUs
   • Optimal K-bins: 32 (49.38 QPS, 8.4% SLA violations)
-  • K-bins sensitivity: 22.0% performance variance across K=[1,2,4,8,16,32]
+  • K-bins sensitivity: 99.6% performance variance across K=[1,2,4,8,16,32]
 
 
 SCHEDULER COMPARISON (10K Requests):
@@ -20,9 +18,9 @@ SCHEDULER COMPARISON (10K Requests):
 MULTI BIN DYNAMIC:
   GPUs: 1
   Capacity QPS: 1.98
-  SLA Violations: 68.3%
-  Avg Latency: 30.772s
-  GPU Utilization: 85.9%
+  SLA Violations: 68.0%
+  Avg Latency: 30.770s
+  GPU Utilization: 86.0%
 
 STATIC FIFO:
   GPUs: 1
@@ -44,7 +42,7 @@ GPU SCALING ANALYSIS (1M Requests, Multi-Bin):
 
 Baseline (1 GPUs):
   Capacity QPS: 0.20
-  SLA Violations: 97.2%
+  SLA Violations: 97.0%
 
 Peak (100 GPUs):
   Capacity QPS: 49.38
@@ -52,7 +50,7 @@ Peak (100 GPUs):
 
 Scaling Efficiency:
   GPU Ratio: 100.0x
-  QPS Ratio: 249.90x
-  Efficiency: 250%
+  QPS Ratio: 246.92x
+  Efficiency: 247%
 
 ================================================================================

@@ -58,6 +58,7 @@ python scripts/comprehensive_stress_test_optimized.py --use-real-timestamps --ma
 
 **Documentation:**
 - [COMPREHENSIVE_STRESS_TEST_3STEP.md](COMPREHENSIVE_STRESS_TEST_3STEP.md) - Full test suite guide
+- [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md) - K-bins impact analysis & SLA calculation insights
 - [OPTIMIZATION_SUMMARY.md](OPTIMIZATION_SUMMARY.md) - Performance optimizations (3-10x speedup)
 - [BUGFIX_KBINS.md](BUGFIX_KBINS.md) - K-bins sensitivity fix (K=8,16,32)
 - [BUGFIX_INCREMENTAL_SAVE.md](BUGFIX_INCREMENTAL_SAVE.md) - Incremental workflow fix
@@ -93,7 +94,7 @@ python scripts/comprehensive_stress_test_optimized.py --use-real-timestamps --ma
 
 1. **`static_fifo`** - Fixed batch size (B=8), no dynamic batching, baseline
 2. **`dynamic_no_bins`** - Single queue with global SLA controller + memory constraint
-3. **`multi_bin_dynamic`** - K bins + **bin-specific** dynamic batching (our contribution)
+3. **`multi_bin_dynamic`** - K=8 bins (default) + **bin-specific** dynamic batching (our contribution)
 
 ### 🎯 Multi-Bin with Bin-Specific Intelligence
 

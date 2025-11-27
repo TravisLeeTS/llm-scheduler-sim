@@ -21,6 +21,14 @@ All experiments use **Level 4 Production** configuration (stress testing):
 - **Incremental Saving**: Results preserved across individual step runs
 - **Progress Indicators**: Real-time feedback with tqdm
 
+**K-Bins Performance Impact:**
+- **Default: K=8 bins** (optimal performance/complexity trade-off)
+- See [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md) for comprehensive analysis
+- K=8-16 is optimal range (K=8 provides 35% better P95 latency vs K=4)
+- K>16 shows diminishing returns (<1% QPS gain per doubling)
+- Long-tail latencies persist but represent legitimate long requests (per-token SLA)
+- No paradox: 8% violations (normalized) vs p95>deadline (raw) are different measurement spaces
+
 ---
 
 ## Core Components

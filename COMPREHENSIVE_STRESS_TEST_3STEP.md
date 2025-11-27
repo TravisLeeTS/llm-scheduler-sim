@@ -133,6 +133,15 @@ The test generates 5 output files:
 - Sensitivity analysis (how critical is K?)
 - Recommendations for production
 
+**Key Findings** (see [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md) for full analysis):
+- **K=1 → K=2**: Dramatic 70% latency reduction and 24% QPS improvement
+- **K=8-16**: Optimal range (best performance/complexity trade-off)
+- **K>16**: Diminishing returns (<1% QPS gain per doubling)
+- **Long-tail latencies**: P99 remains high (10-13s) but many are legitimate long requests (not violations)
+- **No paradox**: 8% SLA violation (normalized space) vs p95=1.56s (raw space) are mathematically consistent
+- **Per-token SLA**: Long requests (2000 tokens) can take 12s and still meet normalized SLA
+- **Batch dynamics**: Avg batch size stays small (1.18-1.23), showing SLA control is effective
+
 ## Expected Execution Time
 
 With **RPS scaling 200x** (stress testing mode):
