@@ -9,7 +9,7 @@ This document provides a comprehensive interpretation of how the K-bins paramete
 ## Test Configuration
 
 - **Dataset**: BurstGPT (1M requests, Azure ChatGPT traces)
-- **Hardware**: 100 GPUs, RTX 4080 calibration
+- **Hardware**: 100 GPUs (RTX 4080 12GB), Qwen3 1.7B FP16 calibration
 - **SLA Deadline**: 1.0 second
 - **RPS Scaling**: 200x (0.27 → 53.9 req/s)
 - **K-bins Tested**: 1, 2, 4, 8, 16, 32
@@ -160,7 +160,7 @@ Both have high absolute latency, but only A violates normalized SLA
    - No amount of queue splitting helps if the request itself is inherently slow
 
 2. **Bursty Arrival Patterns**:
-   - BurstGPT dataset has high burstiness (CV=2.91)
+   - BurstGPT dataset has high burstiness (CV=13.28)
    - Occasional bursts create temporary queue backlogs
    - Even with K=32 bins, bursts can saturate individual bins
 

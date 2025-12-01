@@ -1,0 +1,2685 @@
+======================================================================
+STRESS TEST v4: TTFT/TBT SEPARATION MODEL
+======================================================================
+
+v4 Changes:
+- Token SLA applies ONLY to decode TBT (beta ~ 5.74ms/token)
+- TTFT (alpha ~ 60ms) is tracked separately, not in token SLA
+- Eliminates structural violations where TTFT dominates
+
+======================================================================
+STEP 1: GRID SEARCH (multi_bin_dynamic)
+======================================================================
+Token SLA: 10.0ms (decode TBT only, excludes TTFT)
+Request SLA: 20.0s
+RPS Scaling: 200.0x
+
+Loaded 0 existing results
+
+[1/192] 1,000 req, GPUs=1, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.4% | Decode TBT: 6.95ms | Batch: 3.0 | Time: 0.4s
+Saved 1 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[2/192] 1,000 req, GPUs=1, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 94.6% | Decode TBT: 7.18ms | Batch: 4.9 | Time: 0.1s
+Saved 2 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[3/192] 1,000 req, GPUs=1, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 95.6% | Decode TBT: 7.23ms | Batch: 5.6 | Time: 0.1s
+Saved 3 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[4/192] 1,000 req, GPUs=1, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 95.7% | Decode TBT: 7.36ms | Batch: 9.1 | Time: 0.0s
+Saved 4 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[5/192] 1,000 req, GPUs=1, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 93.2% | Decode TBT: 7.42ms | Batch: 13.9 | Time: 0.0s
+Saved 5 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[6/192] 1,000 req, GPUs=1, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 95.9% | Decode TBT: 7.42ms | Batch: 13.2 | Time: 0.0s
+Saved 6 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[7/192] 1,000 req, GPUs=2, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 96.0% | Decode TBT: 6.96ms | Batch: 3.0 | Time: 0.1s
+Saved 7 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[8/192] 1,000 req, GPUs=2, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 91.7% | Decode TBT: 7.22ms | Batch: 5.5 | Time: 0.1s
+Saved 8 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[9/192] 1,000 req, GPUs=2, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 89.4% | Decode TBT: 7.30ms | Batch: 7.1 | Time: 0.1s
+Saved 9 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[10/192] 1,000 req, GPUs=2, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 91.0% | Decode TBT: 7.34ms | Batch: 8.6 | Time: 0.0s
+Saved 10 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[11/192] 1,000 req, GPUs=2, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 91.9% | Decode TBT: 7.35ms | Batch: 8.8 | Time: 0.0s
+Saved 11 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[12/192] 1,000 req, GPUs=2, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 89.4% | Decode TBT: 7.36ms | Batch: 9.1 | Time: 0.0s
+Saved 12 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[13/192] 1,000 req, GPUs=4, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 83.1% | Decode TBT: 7.28ms | Batch: 6.6 | Time: 0.1s
+Saved 13 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[14/192] 1,000 req, GPUs=4, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 69.3% | Decode TBT: 7.32ms | Batch: 7.7 | Time: 0.1s
+Saved 14 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[15/192] 1,000 req, GPUs=4, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 40.0% | Decode TBT: 7.33ms | Batch: 8.1 | Time: 0.0s
+Saved 15 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[16/192] 1,000 req, GPUs=4, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 53.6% | Decode TBT: 7.32ms | Batch: 7.8 | Time: 0.0s
+Saved 16 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[17/192] 1,000 req, GPUs=4, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 81.0% | Decode TBT: 7.31ms | Batch: 7.5 | Time: 0.0s
+Saved 17 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[18/192] 1,000 req, GPUs=4, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 80.3% | Decode TBT: 7.27ms | Batch: 6.4 | Time: 0.0s
+Saved 18 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[19/192] 1,000 req, GPUs=8, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 78.4% | Decode TBT: 7.19ms | Batch: 5.0 | Time: 0.1s
+Saved 19 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[20/192] 1,000 req, GPUs=8, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 40.8% | Decode TBT: 7.20ms | Batch: 5.2 | Time: 0.0s
+Saved 20 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[21/192] 1,000 req, GPUs=8, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 20.5% | Decode TBT: 7.20ms | Batch: 5.2 | Time: 0.0s
+Saved 21 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[22/192] 1,000 req, GPUs=8, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 20.0% | Decode TBT: 7.18ms | Batch: 4.8 | Time: 0.0s
+Saved 22 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[23/192] 1,000 req, GPUs=8, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 33.5% | Decode TBT: 7.17ms | Batch: 4.7 | Time: 0.0s
+Saved 23 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[24/192] 1,000 req, GPUs=8, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 61.2% | Decode TBT: 7.14ms | Batch: 4.4 | Time: 0.0s
+Saved 24 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[25/192] 1,000 req, GPUs=16, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 41.9% | Decode TBT: 7.08ms | Batch: 3.8 | Time: 0.1s
+Saved 25 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[26/192] 1,000 req, GPUs=16, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 21.4% | Decode TBT: 6.98ms | Batch: 3.2 | Time: 0.0s
+Saved 26 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[27/192] 1,000 req, GPUs=16, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 12.8% | Decode TBT: 6.94ms | Batch: 2.9 | Time: 0.0s
+Saved 27 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[28/192] 1,000 req, GPUs=16, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 9.2% | Decode TBT: 6.91ms | Batch: 2.8 | Time: 0.0s
+Saved 28 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[29/192] 1,000 req, GPUs=16, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 10.1% | Decode TBT: 6.90ms | Batch: 2.8 | Time: 0.0s
+Saved 29 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[30/192] 1,000 req, GPUs=16, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 17.8% | Decode TBT: 6.91ms | Batch: 2.8 | Time: 0.0s
+Saved 30 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[31/192] 1,000 req, GPUs=32, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 4.9% | Decode TBT: 6.62ms | Batch: 1.9 | Time: 0.0s
+Saved 31 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[32/192] 1,000 req, GPUs=32, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 2.2% | Decode TBT: 6.52ms | Batch: 1.7 | Time: 0.0s
+Saved 32 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[33/192] 1,000 req, GPUs=32, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 2.7% | Decode TBT: 6.50ms | Batch: 1.7 | Time: 0.0s
+Saved 33 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[34/192] 1,000 req, GPUs=32, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 1.7% | Decode TBT: 6.49ms | Batch: 1.7 | Time: 0.0s
+Saved 34 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[35/192] 1,000 req, GPUs=32, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 2.3% | Decode TBT: 6.49ms | Batch: 1.7 | Time: 0.0s
+Saved 35 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[36/192] 1,000 req, GPUs=32, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 4.3% | Decode TBT: 6.49ms | Batch: 1.7 | Time: 0.1s
+Saved 36 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[37/192] 1,000 req, GPUs=64, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.91ms | Batch: 1.1 | Time: 0.1s
+Saved 37 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[38/192] 1,000 req, GPUs=64, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.6% | Decode TBT: 5.87ms | Batch: 1.1 | Time: 0.0s
+Saved 38 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[39/192] 1,000 req, GPUs=64, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.5% | Decode TBT: 5.87ms | Batch: 1.1 | Time: 0.1s
+Saved 39 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[40/192] 1,000 req, GPUs=64, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.4% | Decode TBT: 5.86ms | Batch: 1.1 | Time: 0.1s
+Saved 40 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[41/192] 1,000 req, GPUs=64, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.87ms | Batch: 1.1 | Time: 0.1s
+Saved 41 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[42/192] 1,000 req, GPUs=64, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.87ms | Batch: 1.1 | Time: 0.1s
+Saved 42 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[43/192] 1,000 req, GPUs=100, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 43 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[44/192] 1,000 req, GPUs=100, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 78) tokens, B_MAX=128
+  Bin 1: [78, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 44 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[45/192] 1,000 req, GPUs=100, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 18) tokens, B_MAX=128
+  Bin 1: [18, 78) tokens, B_MAX=128
+  Bin 2: [78, 172) tokens, B_MAX=128
+  Bin 3: [172, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 45 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[46/192] 1,000 req, GPUs=100, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 8) tokens, B_MAX=128
+  Bin 1: [8, 18) tokens, B_MAX=128
+  Bin 2: [18, 40) tokens, B_MAX=128
+  Bin 3: [40, 78) tokens, B_MAX=128
+  Bin 4: [78, 119) tokens, B_MAX=128
+  Bin 5: [119, 172) tokens, B_MAX=128
+  Bin 6: [172, 230) tokens, B_MAX=92
+  Bin 7: [230, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 46 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[47/192] 1,000 req, GPUs=100, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 8) tokens, B_MAX=128
+  Bin 2: [8, 13) tokens, B_MAX=128
+  Bin 3: [13, 18) tokens, B_MAX=128
+  Bin 4: [18, 27) tokens, B_MAX=128
+  Bin 5: [27, 40) tokens, B_MAX=128
+  Bin 6: [40, 56) tokens, B_MAX=128
+  Bin 7: [56, 78) tokens, B_MAX=128
+  Bin 8: [78, 96) tokens, B_MAX=128
+  Bin 9: [96, 119) tokens, B_MAX=128
+  Bin 10: [119, 142) tokens, B_MAX=128
+  Bin 11: [142, 172) tokens, B_MAX=118
+  Bin 12: [172, 205) tokens, B_MAX=99
+  Bin 13: [205, 230) tokens, B_MAX=86
+  Bin 14: [230, 267) tokens, B_MAX=75
+  Bin 15: [267, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 47 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[48/192] 1,000 req, GPUs=100, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 1000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 1) tokens, B_MAX=128
+  Bin 3: [1, 8) tokens, B_MAX=128
+  Bin 4: [8, 11) tokens, B_MAX=128
+  Bin 5: [11, 13) tokens, B_MAX=128
+  Bin 6: [13, 15) tokens, B_MAX=128
+  Bin 7: [15, 18) tokens, B_MAX=128
+  Bin 8: [18, 22) tokens, B_MAX=128
+  Bin 9: [22, 27) tokens, B_MAX=128
+  Bin 10: [27, 32) tokens, B_MAX=128
+  Bin 11: [32, 40) tokens, B_MAX=128
+  Bin 12: [40, 47) tokens, B_MAX=128
+  Bin 13: [47, 56) tokens, B_MAX=128
+  Bin 14: [56, 67) tokens, B_MAX=128
+  Bin 15: [67, 78) tokens, B_MAX=128
+  Bin 16: [78, 86) tokens, B_MAX=128
+  Bin 17: [86, 96) tokens, B_MAX=128
+  Bin 18: [96, 110) tokens, B_MAX=128
+  Bin 19: [110, 119) tokens, B_MAX=128
+  Bin 20: [119, 130) tokens, B_MAX=128
+  Bin 21: [130, 142) tokens, B_MAX=128
+  Bin 22: [142, 158) tokens, B_MAX=124
+  Bin 23: [158, 172) tokens, B_MAX=113
+  Bin 24: [172, 188) tokens, B_MAX=103
+  Bin 25: [188, 205) tokens, B_MAX=95
+  Bin 26: [205, 219) tokens, B_MAX=88
+  Bin 27: [219, 230) tokens, B_MAX=83
+  Bin 28: [230, 248) tokens, B_MAX=78
+  Bin 29: [248, 267) tokens, B_MAX=72
+  Bin 30: [267, 291) tokens, B_MAX=66
+  Bin 31: [291, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.74ms | Batch: 1.0 | Time: 0.1s
+Saved 48 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[49/192] 10,000 req, GPUs=1, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.9% | Decode TBT: 6.95ms | Batch: 3.0 | Time: 0.8s
+Saved 49 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[50/192] 10,000 req, GPUs=1, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.7% | Decode TBT: 7.21ms | Batch: 5.2 | Time: 0.7s
+Saved 50 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[51/192] 10,000 req, GPUs=1, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.5% | Decode TBT: 7.22ms | Batch: 5.4 | Time: 0.7s
+Saved 51 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[52/192] 10,000 req, GPUs=1, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.4% | Decode TBT: 7.28ms | Batch: 6.5 | Time: 0.6s
+Saved 52 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[53/192] 10,000 req, GPUs=1, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.1% | Decode TBT: 7.38ms | Batch: 10.3 | Time: 0.6s
+Saved 53 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[54/192] 10,000 req, GPUs=1, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.3% | Decode TBT: 7.46ms | Batch: 18.8 | Time: 0.5s
+Saved 54 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[55/192] 10,000 req, GPUs=2, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.6% | Decode TBT: 6.95ms | Batch: 3.0 | Time: 0.9s
+Saved 55 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[56/192] 10,000 req, GPUs=2, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.3% | Decode TBT: 7.10ms | Batch: 4.0 | Time: 0.7s
+Saved 56 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[57/192] 10,000 req, GPUs=2, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 98.9% | Decode TBT: 7.34ms | Batch: 8.5 | Time: 0.6s
+Saved 57 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[58/192] 10,000 req, GPUs=2, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.0% | Decode TBT: 7.39ms | Batch: 11.2 | Time: 0.6s
+Saved 58 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[59/192] 10,000 req, GPUs=2, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 99.0% | Decode TBT: 7.44ms | Batch: 15.4 | Time: 0.5s
+Saved 59 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[60/192] 10,000 req, GPUs=2, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 97.1% | Decode TBT: 7.46ms | Batch: 19.2 | Time: 0.4s
+Saved 60 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[61/192] 10,000 req, GPUs=4, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 98.3% | Decode TBT: 7.35ms | Batch: 8.7 | Time: 0.6s
+Saved 61 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[62/192] 10,000 req, GPUs=4, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 78.0% | Decode TBT: 7.39ms | Batch: 11.2 | Time: 0.5s
+Saved 62 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[63/192] 10,000 req, GPUs=4, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 42.1% | Decode TBT: 7.42ms | Batch: 13.5 | Time: 0.4s
+Saved 63 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[64/192] 10,000 req, GPUs=4, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 59.9% | Decode TBT: 7.43ms | Batch: 14.7 | Time: 0.4s
+Saved 64 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[65/192] 10,000 req, GPUs=4, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 80.8% | Decode TBT: 7.43ms | Batch: 15.1 | Time: 0.3s
+Saved 65 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[66/192] 10,000 req, GPUs=4, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 89.8% | Decode TBT: 7.43ms | Batch: 14.5 | Time: 0.3s
+Saved 66 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[67/192] 10,000 req, GPUs=8, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 97.8% | Decode TBT: 7.34ms | Batch: 8.3 | Time: 0.6s
+Saved 67 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[68/192] 10,000 req, GPUs=8, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 49.3% | Decode TBT: 7.35ms | Batch: 8.8 | Time: 0.4s
+Saved 68 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[69/192] 10,000 req, GPUs=8, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 24.6% | Decode TBT: 7.34ms | Batch: 8.3 | Time: 0.4s
+Saved 69 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[70/192] 10,000 req, GPUs=8, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 22.1% | Decode TBT: 7.33ms | Batch: 7.9 | Time: 0.3s
+Saved 70 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[71/192] 10,000 req, GPUs=8, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 42.2% | Decode TBT: 7.33ms | Batch: 8.0 | Time: 0.3s
+Saved 71 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[72/192] 10,000 req, GPUs=8, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 69.2% | Decode TBT: 7.32ms | Batch: 7.8 | Time: 0.3s
+Saved 72 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[73/192] 10,000 req, GPUs=16, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 72.4% | Decode TBT: 7.24ms | Batch: 5.8 | Time: 0.6s
+Saved 73 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[74/192] 10,000 req, GPUs=16, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 31.5% | Decode TBT: 7.16ms | Batch: 4.6 | Time: 0.4s
+Saved 74 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[75/192] 10,000 req, GPUs=16, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 15.2% | Decode TBT: 7.10ms | Batch: 4.0 | Time: 0.3s
+Saved 75 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[76/192] 10,000 req, GPUs=16, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 10.8% | Decode TBT: 7.08ms | Batch: 3.9 | Time: 0.3s
+Saved 76 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[77/192] 10,000 req, GPUs=16, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 12.8% | Decode TBT: 7.09ms | Batch: 3.9 | Time: 0.3s
+Saved 77 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[78/192] 10,000 req, GPUs=16, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 26.5% | Decode TBT: 7.09ms | Batch: 3.9 | Time: 0.3s
+Saved 78 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[79/192] 10,000 req, GPUs=32, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 6.8% | Decode TBT: 6.78ms | Batch: 2.3 | Time: 0.4s
+Saved 79 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[80/192] 10,000 req, GPUs=32, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 3.5% | Decode TBT: 6.67ms | Batch: 2.1 | Time: 0.4s
+Saved 80 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[81/192] 10,000 req, GPUs=32, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 3.3% | Decode TBT: 6.63ms | Batch: 2.0 | Time: 0.4s
+Saved 81 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[82/192] 10,000 req, GPUs=32, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 3.3% | Decode TBT: 6.61ms | Batch: 1.9 | Time: 0.4s
+Saved 82 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[83/192] 10,000 req, GPUs=32, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 3.4% | Decode TBT: 6.63ms | Batch: 2.0 | Time: 0.4s
+Saved 83 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[84/192] 10,000 req, GPUs=32, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 5.5% | Decode TBT: 6.62ms | Batch: 1.9 | Time: 0.4s
+Saved 84 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[85/192] 10,000 req, GPUs=64, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.6% | Decode TBT: 6.05ms | Batch: 1.2 | Time: 0.4s
+Saved 85 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[86/192] 10,000 req, GPUs=64, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.6% | Decode TBT: 6.00ms | Batch: 1.2 | Time: 0.5s
+Saved 86 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[87/192] 10,000 req, GPUs=64, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.4% | Decode TBT: 5.98ms | Batch: 1.2 | Time: 0.5s
+Saved 87 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[88/192] 10,000 req, GPUs=64, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.5% | Decode TBT: 5.98ms | Batch: 1.1 | Time: 0.5s
+Saved 88 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[89/192] 10,000 req, GPUs=64, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 12) tokens, B_MAX=128
+  Bin 2: [12, 17) tokens, B_MAX=128
+  Bin 3: [17, 28) tokens, B_MAX=128
+  Bin 4: [28, 45) tokens, B_MAX=128
+  Bin 5: [45, 64) tokens, B_MAX=128
+  Bin 6: [64, 84) tokens, B_MAX=128
+  Bin 7: [84, 103) tokens, B_MAX=128
+  Bin 8: [103, 121) tokens, B_MAX=128
+  Bin 9: [121, 142) tokens, B_MAX=128
+  Bin 10: [142, 167) tokens, B_MAX=121
+  Bin 11: [167, 191) tokens, B_MAX=104
+  Bin 12: [191, 219) tokens, B_MAX=91
+  Bin 13: [219, 247) tokens, B_MAX=80
+  Bin 14: [247, 285) tokens, B_MAX=70
+  Bin 15: [285, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.4% | Decode TBT: 5.98ms | Batch: 1.2 | Time: 0.6s
+Saved 89 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[90/192] 10,000 req, GPUs=64, K=32
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128
+  Bin 1: [1, 1) tokens, B_MAX=128
+  Bin 2: [1, 9) tokens, B_MAX=128
+  Bin 3: [9, 12) tokens, B_MAX=128
+  Bin 4: [12, 14) tokens, B_MAX=128
+  Bin 5: [14, 17) tokens, B_MAX=128
+  Bin 6: [17, 21) tokens, B_MAX=128
+  Bin 7: [21, 28) tokens, B_MAX=128
+  Bin 8: [28, 35) tokens, B_MAX=128
+  Bin 9: [35, 45) tokens, B_MAX=128
+  Bin 10: [45, 54) tokens, B_MAX=128
+  Bin 11: [54, 64) tokens, B_MAX=128
+  Bin 12: [64, 74) tokens, B_MAX=128
+  Bin 13: [74, 84) tokens, B_MAX=128
+  Bin 14: [84, 94) tokens, B_MAX=128
+  Bin 15: [94, 103) tokens, B_MAX=128
+  Bin 16: [103, 111) tokens, B_MAX=128
+  Bin 17: [111, 121) tokens, B_MAX=128
+  Bin 18: [121, 131) tokens, B_MAX=128
+  Bin 19: [131, 142) tokens, B_MAX=128
+  Bin 20: [142, 154) tokens, B_MAX=126
+  Bin 21: [154, 167) tokens, B_MAX=116
+  Bin 22: [167, 178) tokens, B_MAX=108
+  Bin 23: [178, 191) tokens, B_MAX=101
+  Bin 24: [191, 205) tokens, B_MAX=94
+  Bin 25: [205, 219) tokens, B_MAX=88
+  Bin 26: [219, 233) tokens, B_MAX=82
+  Bin 27: [233, 247) tokens, B_MAX=77
+  Bin 28: [247, 265) tokens, B_MAX=72
+  Bin 29: [265, 285) tokens, B_MAX=67
+  Bin 30: [285, 306) tokens, B_MAX=63
+  Bin 31: [306, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.4% | Decode TBT: 5.97ms | Batch: 1.1 | Time: 0.7s
+Saved 90 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[91/192] 10,000 req, GPUs=100, K=1
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [0, 10000) tokens, B_MAX=9
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.2% | Decode TBT: 5.77ms | Batch: 1.0 | Time: 0.6s
+Saved 91 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[92/192] 10,000 req, GPUs=100, K=2
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 103) tokens, B_MAX=128
+  Bin 1: [103, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.2% | Decode TBT: 5.77ms | Batch: 1.0 | Time: 0.6s
+Saved 92 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[93/192] 10,000 req, GPUs=100, K=4
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 28) tokens, B_MAX=128
+  Bin 1: [28, 103) tokens, B_MAX=128
+  Bin 2: [103, 191) tokens, B_MAX=126
+  Bin 3: [191, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.2% | Decode TBT: 5.77ms | Batch: 1.0 | Time: 0.7s
+Saved 93 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[94/192] 10,000 req, GPUs=100, K=8
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 12) tokens, B_MAX=128
+  Bin 1: [12, 28) tokens, B_MAX=128
+  Bin 2: [28, 64) tokens, B_MAX=128
+  Bin 3: [64, 103) tokens, B_MAX=128
+  Bin 4: [103, 142) tokens, B_MAX=128
+  Bin 5: [142, 191) tokens, B_MAX=112
+  Bin 6: [191, 247) tokens, B_MAX=85
+  Bin 7: [247, 10000) tokens, B_MAX=8
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+    Token SLA: 0.0% | Request SLA: 0.1% | Decode TBT: 5.77ms | Batch: 1.0 | Time: 0.7s
+Saved 94 results to C:\Users\tings\llm_scheduler_sim\scripts\..\stress_test_v4_results\step1_grid_search.csv
+
+[95/192] 10,000 req, GPUs=100, K=16
+Loading BurstGPT dataset from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=10.0ms, Per-request=20000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv
+
+LatencyModel fitted from C:\Users\tings\llm_scheduler_sim\scripts\..\data\qwen3_1_7b_latency_grid.csv:
+  alpha (base latency):    59.653 ms
+  beta (per-token coeff):  5.74200 ms/token
+  gamma (batch penalty):   0.316
+  R^2 fit quality:         0.9995
+LatencyModel info: {'calibrated': True, 'method': 'real_gpu_fitted', 'alpha': np.float64(0.05965277786696989), 'beta': np.float64(0.005741996981393911), 'gamma': np.float64(0.31568071151206994)}
+[Bins] Computed equal-mass boundaries from 10000 requests:
+  Bin 0: [1, 1) tokens, B_MAX=128

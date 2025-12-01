@@ -125,49 +125,88 @@ class SLAController:
     """
     SLA-constrained batch size controller using adaptive search (Algorithm 2 from paper).
     
-    Implements the feedback control loop from Dynamic Batching paper:
-    - Maintain adaptive interval [b_low, b_high]
-    - If latency > D_SLA: shrink interval (reduce batch size)
-    - If latency < D_SLA: expand interval (increase batch size)
-    - Return b_SLA as midpoint of interval
+    Paper-Faithful Implementation:
+    - D(b_t) is the mean Time Between Tokens (TBT) during the decode phase
+    - Maintain adaptive interval [b_low, b_high] via feedback control
+    - Parameters from paper:
+      * D_SLA: target maximum decoding time per token
+      * eps_D: tolerance around the SLA
+      * alpha (α): step that controls expansion of interval
+      * delta (δ): small corrective shrink adjustment
+    
+    Algorithm 2 Logic:
+    - Case 1: τ_avg > D_SLA + eps_D (too slow) → shrink interval to left
+    - Case 2: τ_avg < D_SLA - eps_D (too fast) → expand interval to right
+    - Case 3: τ_avg ≈ D_SLA (within band) → center interval around b_avg
+    - Return b_SLA = floor((b_low + b_high) / 2)
     
     NEW: Bin-specific controllers leverage narrower length distributions within bins.
     """
     
-    def __init__(self, D_SLA: float, eps_D: float, B_min: int, B_max: int, bin_idx: int = -1):
+    def __init__(self, D_SLA: float, eps_D: float, B_min: int, B_max: int, bin_idx: int = -1,
+                 alpha_step: int = 4, delta_step: int = 2):
         self.D_SLA = D_SLA
         self.eps_D = eps_D
         self.B_min = B_min
         self.B_max = B_max
         self.bin_idx = bin_idx  # -1 for global, >= 0 for specific bin
         
-        # Adaptive search interval - start in middle for faster convergence
+        # Paper hyperparameters for interval adjustment
+        self.alpha_step = alpha_step  # α: controls expansion/contraction rate
+        self.delta_step = delta_step  # δ: small corrective adjustment
+        
+        # Adaptive search interval - initialized to full range [B_min, B_max]
         self.b_low = B_min
         self.b_high = B_max
         
-        # Moving averages - CRITICAL: start b_avg at midpoint, not minimum!
-        # Starting at B_min = 1 causes slow ramp-up and poor performance
-        self.tau_avg = 0.0  # average latency
-        self.b_avg = float((B_min + B_max) // 2)  # Start at midpoint for better initialization
-        self.alpha = 0.2  # EMA smoothing factor
+        # Moving averages for feedback
+        self.tau_avg = 0.0  # average per-token decode latency (TBT)
+        self.b_avg = float((B_min + B_max) // 2)  # Start at midpoint
+        self.ema_alpha = 0.2  # EMA smoothing factor for averaging
         self.update_count = 0  # Track number of updates
+        
+        # Track N_decode (number of decode requests currently running)
+        self.N_decode = 0
     
-    def update(self, recent_latency: float, recent_batch_size: int) -> None:
-        """Update controller state with recent observations."""
+    def update(self, recent_tbt: float, recent_batch_size: int, N_decode: int = 0) -> None:
+        """
+        Update controller state with recent per-token latency (TBT).
+        
+        Args:
+            recent_tbt: Recent per-token decode latency (TBT)
+            recent_batch_size: Batch size that was used
+            N_decode: Number of decode requests currently in system
+        """
         if recent_batch_size <= 0:
             return
         
-        self.tau_avg = self.alpha * recent_latency + (1 - self.alpha) * self.tau_avg
-        self.b_avg = self.alpha * recent_batch_size + (1 - self.alpha) * self.b_avg
+        self.tau_avg = self.ema_alpha * recent_tbt + (1 - self.ema_alpha) * self.tau_avg
+        self.b_avg = self.ema_alpha * recent_batch_size + (1 - self.ema_alpha) * self.b_avg
+        self.N_decode = N_decode
         self.update_count += 1
     
     def compute_b_SLA(self) -> int:
         """
-        Compute SLA-constrained batch size using adaptive search.
+        Compute SLA-constrained batch size using adaptive search (Algorithm 2).
         
-        CRITICAL FIX: Less aggressive adjustment to prevent collapse to batch size 1.
-        The original implementation was too aggressive, causing dynamic batching to
-        underperform static batching.
+        Paper-Faithful Implementation:
+        
+        Case 1: τ_avg > D_SLA + eps_D (latency too high)
+            - Shrink window to the left (reduce batch size)
+            - b_high_t ≈ max(b_avg, b_low_{t-1} + α)
+            - b_low_t ≈ max(b_low_{t-1} - δ, B_min)
+        
+        Case 2: τ_avg < D_SLA - eps_D (latency too low, can increase)
+            - Shift window to the right (increase batch size)
+            - b_low_t ≈ min(b_avg, b_high_{t-1} - α)
+            - b_high_t ≈ min(b_high_{t-1} + δ, B_max)
+        
+        Case 3: SLA approximately satisfied
+            - Center window around current average
+            - b_high_t = min(b_avg + α/2, B_max)
+            - b_low_t = max(b_avg - α/2, B_min)
+        
+        Final: b_SLA = floor((b_low + b_high) / 2), clamped by N_decode and B_max
         
         Returns:
             b_SLA: Batch size target from SLA controller
@@ -176,24 +215,30 @@ class SLAController:
         if self.tau_avg == 0.0 or self.update_count < 3:
             return (self.b_low + self.b_high) // 2
         
-        # Only adjust if significantly outside SLA band (2x epsilon)
-        # This prevents overreaction to minor variations
-        if self.tau_avg > self.D_SLA + 2 * self.eps_D:
-            # Latency too high → decrease batch size (but not too aggressively)
-            # Reduce by 20% instead of collapsing to minimum
-            new_high = max(self.B_min, int(self.b_avg * 0.9))
-            self.b_high = min(self.b_high, new_high)
-            self.b_low = max(self.B_min, min(self.b_low, int(self.b_avg * 0.7)))
-        elif self.tau_avg < self.D_SLA - 2 * self.eps_D:
-            # Latency too low → increase batch size
-            self.b_low = max(self.b_low, int(self.b_avg))
-            self.b_high = min(self.b_high + int(0.3 * self.b_avg), self.B_max)
+        α = self.alpha_step
+        δ = self.delta_step
+        
+        if self.tau_avg > self.D_SLA + self.eps_D:
+            # Case 1: Latency too high → shrink interval to left
+            # We need smaller batch sizes
+            new_b_high = max(int(self.b_avg), self.b_low + α)
+            new_b_low = max(self.b_low - δ, self.B_min)
+            self.b_high = min(self.b_high, new_b_high)  # Only shrink, never expand
+            self.b_low = new_b_low
+            
+        elif self.tau_avg < self.D_SLA - self.eps_D:
+            # Case 2: Latency comfortably below SLA → expand interval to right
+            # We can increase batch size for more throughput
+            new_b_low = min(int(self.b_avg), self.b_high - α)
+            new_b_high = min(self.b_high + δ, self.B_max)
+            self.b_low = max(self.b_low, new_b_low)  # Only shift right, never left
+            self.b_high = new_b_high
+            
         else:
-            # Within SLA band → maintain current range with small adjustments
-            range_size = self.b_high - self.b_low
-            margin = max(2, int(0.15 * range_size))  # At least 2, up to 15% of range
-            self.b_low = max(self.B_min, int(self.b_avg) - margin)
-            self.b_high = min(self.B_max, int(self.b_avg) + margin)
+            # Case 3: SLA approximately satisfied → center around current
+            half_α = α // 2
+            self.b_high = min(int(self.b_avg) + half_α, self.B_max)
+            self.b_low = max(int(self.b_avg) - half_α, self.B_min)
         
         # Ensure valid interval
         self.b_low = max(self.B_min, self.b_low)
@@ -201,39 +246,102 @@ class SLAController:
         if self.b_low > self.b_high:
             self.b_low = self.b_high
         
+        # Compute midpoint as paper algorithm
         b_SLA = (self.b_low + self.b_high) // 2
-        return max(self.B_min, min(self.B_max, b_SLA))
+        
+        # Paper requirement: b_SLA >= N_decode (don't starve decode requests)
+        # and b_SLA <= B_max
+        b_SLA = max(b_SLA, self.N_decode) if self.N_decode > 0 else b_SLA
+        b_SLA = min(b_SLA, self.B_max)
+        
+        return max(self.B_min, b_SLA)
 
 
-def compute_b_mem(stats: BatchStatistics, cfg: SchedulerConfig) -> int:
+def compute_b_mem(stats: BatchStatistics, cfg: SchedulerConfig, bin_idx: int = -1, 
+                  N_decode: int = 0, N_prefill: int = 0) -> int:
     """
     Compute memory-constrained batch size (Algorithm 1 from paper).
     
-    Based on:
-    η = (M_max - M_model) / kv_mem_per_token  (token capacity)
-    μ = avg(prompt_len + output_len)          (avg tokens/req)
-    b_mem = floor((η - L₀) / μ)               (max batch size)
+    Paper-Faithful Implementation:
+    
+    Memory Model (KV cache):
+        S = Σ(l_in,i + l_out,i) for all requests in batch
+        E[S] = b_t × E[l_in + l_out]
+        Var(S) = b_t × (Var(l_in) + Var(l_out))
+    
+    CLT approximation: S ~ N(μ_S, σ_S²)
+    
+    Probabilistic constraint: Pr(S > η) ≤ ε_M
+    
+    Safety buffer (precomputed):
+        L₀ = η - (θ × σ_S + μ_S)  where θ = Φ⁻¹(1 - ε_M)
+    
+    Runtime formula:
+        b_mem = floor((η - L₀) / E[l_in + l_out])
+    
+    Paper requirement: Only update b_mem if both N_prefill > 0 AND N_decode > 0
+    Otherwise, keep previous batch size.
     
     Args:
-        stats: Running statistics
+        stats: Running statistics (bin-specific or global)
         cfg: Scheduler configuration
+        bin_idx: Bin index for per-bin batch limits (-1 for global)
+        N_decode: Number of decode requests (from last interval)
+        N_prefill: Number of prefill requests (from last interval)
     
     Returns:
         Maximum batch size that fits in memory
     """
-    # Token capacity from GPU memory
+    # Token capacity η from GPU memory (how many tokens fit)
+    # η = (M_max - M_model) / kv_mem_per_token
     eta = (cfg.M_MAX_GB - cfg.M_MODEL_GB) / cfg.KV_MEM_PER_TOKEN_GB
     
-    # Average tokens per request
-    avg_tokens = stats.avg_prompt_len + stats.avg_output_len
+    # Average tokens per request: E[l_in + l_out]
+    E_l_total = stats.avg_prompt_len + stats.avg_output_len
     
-    # Safety buffer (10% of capacity)
+    # Safety: if no stats yet, use conservative estimate
+    if E_l_total <= 0:
+        E_l_total = 500.0  # Conservative default
+    
+    # Safety buffer L₀ (paper uses CLT-derived value)
+    # Simplified: use 10% of capacity as safety buffer
+    # This corresponds to ε_M ≈ 0.05 (5% OOM probability)
     L0 = 0.1 * eta
     
-    # Compute batch size
-    b_mem = int((eta - L0) / avg_tokens)
+    # Paper Algorithm 1 logic:
+    # Only recompute b_mem if both types of work are present
+    # This prevents oscillation when workload is unbalanced
+    # Note: In simulation we may not track N_prefill/N_decode explicitly,
+    # so we default to always computing (caller can pass 0 to skip check)
+    if N_decode > 0 and N_prefill > 0:
+        # Paper formula: b_mem = floor((η - L₀) / E[l_in + l_out])
+        b_raw = int((eta - L0) / E_l_total) if E_l_total > 0 else cfg.B_MAX
+        
+        # Paper requirement: b_mem >= N_decode (can't serve fewer than active decodes)
+        b_mem = max(b_raw, N_decode)
+    elif N_decode > 0 or N_prefill > 0:
+        # Only one type of work present: compute but don't require N_decode minimum
+        b_mem = int((eta - L0) / E_l_total) if E_l_total > 0 else cfg.B_MAX
+    else:
+        # No work tracked yet: compute anyway (simulation startup)
+        b_mem = int((eta - L0) / E_l_total) if E_l_total > 0 else cfg.B_MAX
     
-    # Clamp to reasonable range
+    # Overflow protection - ensure b_mem is a valid numeric type for isfinite check
+    # This handles edge cases where int() on extreme float values produces non-standard types
+    try:
+        b_mem_float = float(b_mem)
+        if not np.isfinite(b_mem_float) or b_mem < 0:
+            b_mem = cfg.B_MAX
+    except (ValueError, OverflowError, TypeError):
+        b_mem = cfg.B_MAX
+    
+    # Apply per-bin batch limit if available
+    # Longer bins get smaller B_MAX (memory + latency constrained)
+    if bin_idx >= 0 and cfg.BIN_B_MAX is not None and bin_idx < len(cfg.BIN_B_MAX):
+        bin_b_max = cfg.BIN_B_MAX[bin_idx]
+        b_mem = min(b_mem, bin_b_max)
+    
+    # Clamp to [1, B_MAX]
     return max(1, min(cfg.B_MAX, b_mem))
 
 
@@ -296,6 +404,10 @@ class MultiBinScheduler:
         Returns:
             Bin index (0 to K_BINS-1)
         """
+        # Fallback if boundaries not yet computed
+        if self.cfg.BIN_BOUNDARIES is None:
+            return 0  # Put everything in bin 0
+        
         for i, (min_len, max_len) in enumerate(self.cfg.BIN_BOUNDARIES):
             if min_len <= predicted_output_len < max_len:
                 return i
@@ -445,13 +557,20 @@ class DynamicBatcher:
         # Per-bin statistics and controllers (for multi-bin scheduler)
         # Key insight: bins have narrower [L_min, L_max] ranges
         # → smaller E[max(t_j) | bin] → better throughput
+        # → longer bins get smaller B_MAX (memory + latency constrained)
         self.bin_stats = [BatchStatistics(bin_idx=i) for i in range(cfg.K_BINS)]
+        
+        # Get per-bin batch limits (longer bins → smaller max batch)
+        bin_b_max = getattr(cfg, 'BIN_B_MAX', None)
+        if bin_b_max is None:
+            bin_b_max = [cfg.B_MAX] * cfg.K_BINS
+        
         self.bin_sla_controllers = [
             SLAController(
                 D_SLA=cfg.D_SLA,
                 eps_D=cfg.LATENCY_EPSILON,
                 B_min=cfg.B_MIN,
-                B_max=cfg.B_MAX,
+                B_max=bin_b_max[i] if i < len(bin_b_max) else cfg.B_MAX,  # Per-bin max
                 bin_idx=i,
             )
             for i in range(cfg.K_BINS)
@@ -495,7 +614,8 @@ class DynamicBatcher:
         
         # Compute target batch size using paper algorithms
         # With bin-specific stats, b_mem and b_SLA are tuned to the bin's characteristics
-        b_mem = compute_b_mem(stats, self.cfg)
+        # b_mem respects per-bin batch limits for longer sequences
+        b_mem = compute_b_mem(stats, self.cfg, bin_idx=bin_idx)
         b_SLA = sla_controller.compute_b_SLA()
         b_target = min(b_mem, b_SLA)
         
@@ -517,11 +637,20 @@ class DynamicBatcher:
         
         return batch, service_time
     
-    def update_after_batch(self, batch: List[Request], service_time: float, bin_idx: int = -1) -> None:
+    def update_after_batch(self, batch: List[Request], service_time: float, bin_idx: int = -1,
+                           N_decode: int = 0, N_prefill: int = 0, decode_tbt: float = None) -> None:
         """
-        Update statistics and controllers after batch completion.
+        Update statistics and controllers after batch completion (Feedback Loop).
         
-        This implements the feedback loop from the papers.
+        Paper-Faithful Implementation:
+        This implements the feedback loop from both papers:
+        - Algorithm 1 (Memory): Updates E[l_in + l_out] estimates
+        - Algorithm 2 (SLA): Updates τ_avg and b_avg for interval adjustment
+        
+        v2 SLA Model (TTFT/TBT Separation):
+        - Token SLA applies ONLY to decode TBT (β * h(b)), NOT TTFT
+        - decode_tbt parameter provides the actual decode-only TBT for SLA feedback
+        - This allows the controller to properly learn and maximize batch size
         
         NEW: Updates bin-specific controllers when bin_idx >= 0.
         This allows each bin to learn from its narrower length distribution.
@@ -530,6 +659,9 @@ class DynamicBatcher:
             batch: Completed batch
             service_time: Actual service time
             bin_idx: Which bin the batch came from (-1 for no bin)
+            N_decode: Number of decode requests currently in system
+            N_prefill: Number of prefill requests currently in system
+            decode_tbt: Decode-only TBT (β * h(b)) for SLA feedback (v2 model)
         """
         if not batch:
             return
@@ -543,11 +675,23 @@ class DynamicBatcher:
             sla_controller = self.global_sla_controller
         
         # Update running statistics (for Algorithm 1)
+        # This updates E[l_in], E[l_out] using EMA
         stats.update(batch)
         
         # Update SLA controller (for Algorithm 2)
+        # v2 model: Use decode-only TBT (excludes TTFT)
+        # This allows controller to learn correct batch sizes since decode TBT << D_SLA
+        if decode_tbt is not None:
+            # v2: Use provided decode-only TBT (β * h(b))
+            recent_tbt = decode_tbt
+        else:
+            # Legacy fallback: service_time / max_output_len (includes TTFT)
+            max_output_len = max(r.output_len for r in batch) if batch else 1
+            recent_tbt = service_time / max_output_len if max_output_len > 0 else service_time
+
         # With bin-specific feedback, each bin learns its own latency characteristics
-        sla_controller.update(service_time, len(batch))
+        # Pass N_decode so controller can ensure b_SLA >= N_decode (paper requirement)
+        sla_controller.update(recent_tbt, len(batch), N_decode=N_decode)
     
     def _check_memory_constraint(self, batch: List[Request]) -> bool:
         """
@@ -570,10 +714,11 @@ class DynamicBatcher:
     
     def _check_latency_constraint(self, service_time: float) -> bool:
         """
-        Check if service time is within SLA bounds.
+        Check if per-token decode latency (TBT) is within SLA bounds.
         
         Args:
             service_time: Estimated service time in seconds
+            (callers should divide by max output length when using this constraint)
         
         Returns:
             True if within bounds, False otherwise

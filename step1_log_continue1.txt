@@ -1,0 +1,49 @@
+================================================================================
+TWO-STEP STRESS TESTING FOR LLM INFERENCE OPTIMIZATION
+================================================================================
+RPS Scaling: 200.0x
+SLA Target: 50ms per token
+
+
+================================================================================
+STEP 1: MULTI-BIN + DYNAMIC GRID SEARCH
+================================================================================
+Request counts: ['100,000']
+GPU counts: [64]
+Bin counts: [16, 32]
+Total combinations: 2
+
+
+============================================================
+REQUEST COUNT: 100,000
+============================================================
+
+[1/2] GPUs=64, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 100000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 14690 tok/s, P95 Lat: 0.653s, GPU Util: 4.4% [5.9s]
+
+[2/2] GPUs=64, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 100000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 14690 tok/s, P95 Lat: 0.654s, GPU Util: 4.4% [7.5s]
+
+[STEP 1 COMPLETE] Results saved to step1_continue1.csv
+
+================================================================================
+COMPLETE! Total execution time: 0.2 minutes
+================================================================================

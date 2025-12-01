@@ -183,7 +183,7 @@ RPS_SCALING = 200.0  # 0.27 req/s → 54 req/s
 - Real BurstGPT arrival rate is very low (0.27 req/s)
 - All schedulers handle this load easily (<0.5% SLA violations)
 - 200x scaling creates meaningful stress (~54 req/s)
-- Preserves temporal patterns (burstiness, CV=2.91)
+- Preserves temporal patterns (burstiness, CV=13.28)
 - Enables scheduler differentiation
 
 ### Realistic Benchmarking Mode

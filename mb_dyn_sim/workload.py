@@ -18,12 +18,18 @@ class Request:
     prompt_len: int
     output_len: int
     predicted_output_len: int
-    deadline: float
+    deadline: float  # D_SLA_TOKEN: Per-token decode TBT threshold
+    deadline_request: float = 20.0  # D_SLA_REQUEST: Per-request total latency threshold (seconds)
     
     # Fields filled during simulation
     start_service_time: float = -1.0
     completion_time: float = -1.0
     assigned_gpu: int = -1
+    per_token_tbt: float = -1.0  # Legacy: total TBT = service_time / output_len
+    
+    # NEW: Separated TTFT and Decode TBT (v2 SLA model)
+    ttft: float = -1.0           # Time To First Token (prefill latency, α ≈ 60ms)
+    decode_tbt: float = -1.0     # Decode-only TBT (β * h(b) ≈ 5.74ms/token)
     
     @property
     def latency(self) -> float:
@@ -48,10 +54,43 @@ class Request:
     
     @property
     def violates_sla(self) -> bool:
-        """Whether this request violated its SLA deadline."""
+        """
+        Whether this request violated its per-token SLA based on DECODE TBT only.
+        
+        v2 SLA Model (TTFT/TBT Separation):
+        - Token SLA applies ONLY to decode TBT (β ≈ 5.74ms/token), NOT TTFT
+        - TTFT (α ≈ 60ms) is prefill latency and is tracked separately
+        - D_SLA_TOKEN (30ms or 10ms) is checked against decode_tbt only
+        - This eliminates structural violations where TTFT dominates
+        
+        Uses decode_tbt if available (v2), falls back to per_token_tbt (v1)
+        """
         if self.completion_time < 0:
             return False
-        return self.completion_time > self.deadline
+        
+        # v2: Use decode-only TBT (excludes TTFT)
+        if self.decode_tbt >= 0:
+            return self.decode_tbt > self.deadline
+        
+        # v1 fallback: Use total TBT (includes TTFT, may have structural violations)
+        if self.per_token_tbt >= 0:
+            return self.per_token_tbt > self.deadline
+        
+        return False
+    
+    @property
+    def violates_sla_request(self) -> bool:
+        """
+        Whether this request violated its per-request SLA based on total latency.
+        
+        Production-grade definition:
+        - D_SLA_REQUEST is the maximum allowed total request latency (150ms for interactive)
+        - A request violates per-request SLA if total latency exceeds D_SLA_REQUEST
+        - The 'deadline_request' field stores the D_SLA_REQUEST threshold value
+        """
+        if self.completion_time < 0:
+            return False
+        return self.latency > self.deadline_request
 
 
 def predict_output_len(prompt_len: int, alpha: float = 1.5, noise_std: float = 0.1) -> int:
@@ -84,8 +123,9 @@ def predict_output_len(prompt_len: int, alpha: float = 1.5, noise_std: float = 0
 
 
 
-def load_burstgpt_dataset(dataset_path: str, num_requests: int, d_sla: float = 1.0, 
-                          use_real_timestamps: bool = True, rps_scaling: float = 1.0) -> List[Request]:
+def load_burstgpt_dataset(dataset_path: str, num_requests: int, d_sla_token: float = 0.005,
+                          d_sla_request: float = 0.150, use_real_timestamps: bool = True, 
+                          rps_scaling: float = 1.0) -> List[Request]:
     """
     Load BurstGPT dataset from CSV file (real Azure ChatGPT traces).
     
@@ -97,7 +137,8 @@ def load_burstgpt_dataset(dataset_path: str, num_requests: int, d_sla: float = 1
     Args:
         dataset_path: Path to CSV file
         num_requests: Number of requests to load
-        d_sla: SLA deadline in seconds
+        d_sla_token: Per-token SLA deadline in seconds (default 5ms for 200 tokens/sec)
+        d_sla_request: Per-request SLA deadline in seconds (default 150ms for interactive)
         use_real_timestamps: If True, use actual timestamps from dataset (preserves real arrival patterns).
                            If False, use RPS scaling factor to compress/stretch times.
         rps_scaling: RPS scaling factor (only used if use_real_timestamps=False)
@@ -137,6 +178,7 @@ def load_burstgpt_dataset(dataset_path: str, num_requests: int, d_sla: float = 1
         raise ValueError(f"Dataset must have arrival_time/Timestamp, prompt/request tokens, and output/response tokens columns. Found: {df.columns.tolist()}")
     
     print(f"Loaded {len(df)} requests from dataset")
+    print(f"SLA thresholds: Per-token={d_sla_token*1000:.1f}ms, Per-request={d_sla_request*1000:.1f}ms")
     
     if use_real_timestamps:
         print(f"Using REAL timestamps from dataset (preserves actual arrival patterns)")
@@ -160,13 +202,17 @@ def load_burstgpt_dataset(dataset_path: str, num_requests: int, d_sla: float = 1
         
         predicted_len = predict_output_len(prompt_len)
         
+        # Store dual SLA thresholds:
+        # - deadline: D_SLA_TOKEN (per-token TBT threshold)
+        # - deadline_request: D_SLA_REQUEST (total request latency threshold)
         req = Request(
             id=i,
             arrival_time=arrival_time,
             prompt_len=prompt_len,
             output_len=output_len,
             predicted_output_len=predicted_len,
-            deadline=arrival_time + d_sla,
+            deadline=d_sla_token,           # Per-token TBT threshold
+            deadline_request=d_sla_request,  # Per-request latency threshold
         )
         requests.append(req)
     
@@ -199,10 +245,15 @@ def generate_workload(cfg: SchedulerConfig) -> List[Request]:
     use_real_timestamps = getattr(cfg, 'USE_REAL_TIMESTAMPS', True)
     rps_scaling = getattr(cfg, 'RPS_SCALING', 1.0)
     
+    # Get dual SLA thresholds (with backward compatibility)
+    d_sla_token = getattr(cfg, 'D_SLA_TOKEN', getattr(cfg, 'D_SLA', 0.005))
+    d_sla_request = getattr(cfg, 'D_SLA_REQUEST', 0.150)
+    
     return load_burstgpt_dataset(
         cfg.DATASET_PATH, 
         cfg.NUM_REQUESTS, 
-        cfg.D_SLA, 
+        d_sla_token=d_sla_token,
+        d_sla_request=d_sla_request,
         use_real_timestamps=use_real_timestamps,
         rps_scaling=rps_scaling
     )

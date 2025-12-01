@@ -2,7 +2,7 @@
 Real GPU Calibration Script (Transformers version)
 
 Windows-compatible GPU calibration using Hugging Face Transformers.
-Measures Qwen2.5 latency on RTX 4080 for discrete-event simulator.
+Measures Qwen3 1.7B latency on RTX 4080 12GB for discrete-event simulator.
 
 This script calibrates the latency model: T(b, L) = α + β·L·(1 + γ·(b-1)/b)
 where:
@@ -14,8 +14,8 @@ Usage:
     # Quick test (2-3 minutes)
     python scripts/calibrate_real_gpu_transformers.py --model Qwen/Qwen2.5-0.5B --batch-sizes 1 2 --max-seq-lens 128 256 --trials 2
     
-    # Full calibration for Qwen2.5-1.5B (~30-45 minutes)
-    python scripts/calibrate_real_gpu_transformers.py --model Qwen/Qwen2.5-1.5B --batch-sizes 1 2 4 8 --max-seq-lens 128 256 512 1024 --trials 3
+    # Full calibration for Qwen3 1.7B (~30-45 minutes) - used for qwen3_1_7b_latency_grid.csv
+    python scripts/calibrate_real_gpu_transformers.py --model Qwen/Qwen3-1.7B --batch-sizes 1 2 4 8 16 32 --max-seq-lens 128 256 512 1024 2048 --trials 3
 """
 
 import argparse

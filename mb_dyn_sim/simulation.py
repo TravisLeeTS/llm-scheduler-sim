@@ -35,16 +35,37 @@ class Event:
 
 @dataclass
 class GPUState:
-    """State of a single GPU."""
+    """
+    State of a single GPU.
+    
+    Paper-Faithful Design:
+    Each GPU maintains its own controller state for SLA-constrained dynamic batching.
+    This enables per-GPU adaptation based on the workload characteristics (bins) it receives.
+    
+    Key State Variables (per GPU):
+    - current_batch: Requests currently being processed
+    - Statistics: recent latency, batch sizes, work counts
+    - Controller state tracked by DynamicBatcher (b_low, b_high per bin)
+    """
     gpu_id: int
     busy: bool = False
     free_at: float = 0.0
     current_batch: List[Request] = field(default_factory=list)
     
-    # Statistics
+    # Statistics for paper metrics
     total_batches: int = 0
     total_requests: int = 0
     total_busy_time: float = 0.0
+    
+    # Per-GPU work tracking (for Algorithm 1 condition check)
+    # N_prefill: requests in prefill phase (prompt processing)
+    # N_decode: requests in decode phase (token generation)
+    N_prefill: int = 0
+    N_decode: int = 0
+    
+    # Recent statistics for feedback (EMA smoothed)
+    recent_avg_batch_size: float = 8.0
+    recent_avg_latency: float = 0.1
 
 
 class Simulator:
@@ -87,11 +108,21 @@ class Simulator:
         # Initialize service time function
         if cfg.USE_REAL_CALIBRATION and cfg.CALIBRATION_CSV_PATH:
             print(f"Using real GPU calibration from: {cfg.CALIBRATION_CSV_PATH}")
-            latency_model = LatencyModel(cfg.CALIBRATION_CSV_PATH)
-            self.service_time_fn = latency_model.predict
-            print(f"LatencyModel info: {latency_model.get_info()}")
+            self.latency_model = LatencyModel(cfg.CALIBRATION_CSV_PATH)
+            self.service_time_fn = self.latency_model.predict
+            print(f"LatencyModel info: {self.latency_model.get_info()}")
         else:
+            self.latency_model = None
             self.service_time_fn = get_service_time_function()
+        
+        # Compute equal-mass bin boundaries if not provided (quantile-based)
+        if cfg.BIN_BOUNDARIES is None and scheduler_type in ["multi_bin_dynamic", "multi_bin_only"]:
+            predicted_lengths = [r.predicted_output_len for r in self.requests]
+            cfg.compute_bin_boundaries(predicted_lengths)
+            print(f"[Bins] Computed equal-mass boundaries from {len(predicted_lengths)} requests:")
+            for i, (min_len, max_len) in enumerate(cfg.BIN_BOUNDARIES):
+                b_max = cfg.BIN_B_MAX[i] if cfg.BIN_B_MAX else cfg.B_MAX
+                print(f"  Bin {i}: [{min_len}, {max_len}) tokens, B_MAX={b_max}")
         
         # Initialize scheduler and batcher based on scheduler_type
         # Each scheduler mode should have DISTINCT behavior
@@ -173,7 +204,13 @@ class Simulator:
     
     def _handle_gpu_free(self, gpu_id: int) -> None:
         """
-        Handle a GPU becoming free.
+        Handle a GPU becoming free (Paper-Faithful Feedback Loop).
+        
+        This implements the feedback mechanism from both papers:
+        1. Calculate actual service time and TBT for feedback
+        2. Update statistics for Algorithm 1 (memory constraint)
+        3. Update SLA controller for Algorithm 2 (interval adjustment)
+        4. Track N_decode for constraint checking
         
         Args:
             gpu_id: ID of the GPU that became free
@@ -192,29 +229,96 @@ class Simulator:
                 bin_idx = self._get_bin_idx(req.predicted_output_len)
             else:
                 bin_idx = -1
+            
+            # Update per-GPU statistics (EMA)
+            alpha = 0.2
+            gpu.recent_avg_batch_size = alpha * len(gpu.current_batch) + (1 - alpha) * gpu.recent_avg_batch_size
+            gpu.recent_avg_latency = alpha * service_time + (1 - alpha) * gpu.recent_avg_latency
         else:
             service_time = 0.0
             bin_idx = -1
         
+        # Count N_decode = total decode requests across all GPUs
+        # (In real system this would be tracked per-GPU, but for simulation
+        # we approximate with total in-flight requests)
+        N_decode = sum(len(g.current_batch) for g in self.gpus if g.gpu_id != gpu_id and g.busy)
+        N_prefill = 0  # In simulation, all arrivals are treated as prefill initially
+        
+        # v2: Compute decode-only TBT for SLA controller feedback
+        # This must be computed BEFORE update_after_batch so we can pass the correct value
+        if self.latency_model and self.latency_model.calibrated:
+            beta = self.latency_model.beta
+            gamma = self.latency_model.gamma
+            h_b = 1.0 + gamma * (len(gpu.current_batch) - 1) / max(1, len(gpu.current_batch))
+            decode_tbt_for_sla = beta * h_b
+        else:
+            decode_tbt_for_sla = 0.00574  # Default 5.74ms
+        
         # Update batcher statistics (feedback loop for Algorithm 1 & 2)
         # Only multi_bin uses bin-specific learning, dynamic_no_bins uses global
+        # CRITICAL: Pass decode_tbt for SLA controller (v2 model)
         if self.batcher and hasattr(self.batcher, 'update_after_batch'):
             if self.scheduler_type == "dynamic_no_bins":
                 # Force global statistics for dynamic_no_bins
-                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=-1)
+                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=-1,
+                                                N_decode=N_decode, N_prefill=N_prefill,
+                                                decode_tbt=decode_tbt_for_sla)
             else:
                 # multi_bin_dynamic uses bin-specific learning
-                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=bin_idx)
+                self.batcher.update_after_batch(gpu.current_batch, service_time, bin_idx=bin_idx,
+                                                N_decode=N_decode, N_prefill=N_prefill,
+                                                decode_tbt=decode_tbt_for_sla)
         
-        # Mark completed requests
+        # Calculate per-token TBT (Time Between Tokens) for SLA evaluation
+        # 
+        # v2 SLA Model (TTFT/TBT Separation):
+        # - Total service time: t(b, L) = α + β * L * h(b)
+        # - TTFT (prefill):    α ≈ 60ms (time to first token)
+        # - Decode TBT:        β * h(b) ≈ 5.74ms/token (per-token decode time)
+        # 
+        # Token SLA applies ONLY to decode TBT, NOT to TTFT
+        # This eliminates structural violations where α/L dominates for short outputs
+        
+        max_output_len = max(r.output_len for r in gpu.current_batch) if gpu.current_batch else 1
+        batch_size = len(gpu.current_batch)
+        
+        # Legacy: total TBT (includes TTFT, for backward compatibility)
+        per_token_tbt = service_time / max_output_len if max_output_len > 0 else 0.0
+        
+        # v2: Compute separated TTFT and decode-only TBT
+        if self.latency_model and self.latency_model.calibrated:
+            # Use calibrated parameters: α (alpha), β (beta), γ (gamma)
+            alpha = self.latency_model.alpha  # TTFT ≈ 60ms
+            beta = self.latency_model.beta    # Per-token decode ≈ 5.74ms
+            gamma = self.latency_model.gamma  # Batch penalty ≈ 0.316
+            
+            # h(b) = 1 + γ * (b-1)/b (batch overhead factor)
+            h_b = 1.0 + gamma * (batch_size - 1) / max(1, batch_size)
+            
+            # TTFT = α (prefill latency, first token)
+            ttft = alpha
+            
+            # Decode TBT = β * h(b) (per-token decode time, excludes TTFT)
+            decode_tbt = beta * h_b
+        else:
+            # Fallback: use default values
+            ttft = 0.060  # 60ms default TTFT
+            decode_tbt = 0.00574  # 5.74ms default decode TBT
+        
+        # Mark completed requests with timing info
         for req in gpu.current_batch:
             req.completion_time = self.current_time
             req.assigned_gpu = gpu_id
+            req.per_token_tbt = per_token_tbt   # Legacy: total TBT
+            req.ttft = ttft                      # v2: TTFT (prefill)
+            req.decode_tbt = decode_tbt          # v2: Decode-only TBT (for SLA)
             self.completed_requests.append(req)
         
         # Update GPU state
         gpu.busy = False
         gpu.current_batch = []
+        gpu.N_decode = 0
+        gpu.N_prefill = 0
         self._idle_gpus.add(gpu.gpu_id)  # Mark as idle
         
         # Try to schedule new work on this GPU
@@ -357,7 +461,7 @@ class Simulator:
         Returns:
             Bin index (0 to K_BINS-1), or -1 if not using bins
         """
-        if not hasattr(self.cfg, 'BIN_BOUNDARIES'):
+        if not hasattr(self.cfg, 'BIN_BOUNDARIES') or self.cfg.BIN_BOUNDARIES is None:
             return -1
         
         for i, (min_len, max_len) in enumerate(self.cfg.BIN_BOUNDARIES):

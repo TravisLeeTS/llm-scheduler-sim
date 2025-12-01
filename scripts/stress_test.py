@@ -86,7 +86,8 @@ def run_single_test(
         
         # Compute metrics
         from mb_dyn_sim.metrics import compute_gpu_utilization, compute_batch_statistics
-        metrics = compute_metrics(completed_requests)
+        # Compute metrics (pass d_sla for paper-faithful SLA evaluation)
+        metrics = compute_metrics(completed_requests, d_sla=cfg.D_SLA)
         gpu_stats = simulator.get_gpu_stats()
         gpu_metrics = compute_gpu_utilization(gpu_stats)
         batch_stats = compute_batch_statistics(completed_requests)

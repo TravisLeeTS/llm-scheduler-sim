@@ -50,8 +50,8 @@ def run_experiment(
     sim = Simulator(cfg, requests, scheduler_type=scheduler_type)
     completed = sim.run()
     
-    # Compute metrics
-    metrics = compute_metrics(completed)
+    # Compute metrics (pass d_sla for paper-faithful SLA evaluation)
+    metrics = compute_metrics(completed, d_sla=cfg.D_SLA)
     gpu_stats = sim.get_gpu_stats()
     gpu_metrics = compute_gpu_utilization(gpu_stats)
     batch_stats = compute_batch_statistics(completed)

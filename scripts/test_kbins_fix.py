@@ -25,7 +25,7 @@ for k in k_values:
         scheduler_type="multi_bin_dynamic",
         use_real_timestamps=False,
         rps_scaling=200.0,
-        d_sla=1.0,
+        d_sla=0.05,
         dataset_path="data/BurstGPT_sample.csv",
         calibration_csv="data/qwen3_1_7b_latency_grid.csv",
         k_bins=k,

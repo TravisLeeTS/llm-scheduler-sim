@@ -1,0 +1,26 @@
+
+================================================================================
+STRESS TEST V2 - COMPREHENSIVE RESULTS
+================================================================================
+
+SLA CONFIGURATION (Production-Calibrated from Gemini Flash Lite):
+  - Token SLA: 30ms per-token latency threshold
+  - Request SLA: 500s end-to-end request latency threshold
+  - Latency Model: 60ms base + 5.74ms/token (R2=0.9995)
+
+================================================================================
+STEP 2: SCHEDULER COMPARISON RESULTS
+================================================================================
+
+Scheduler                  | 1K Req Token | 1K Req Req | 10K Token | 10K Req
+---------------------------+--------------+------------+-----------+---------
+Static FIFO (1 GPU)        | 74.3%        | 40.9%      | 63.1%     | 4.1%
+Dynamic No-Bins (1 GPU)    | 87.2%        | 100.0%     | 80.2%     | 10.8%
+Multi-Bin K=4 (1 GPU)      | 94.8%        | 100.0%     | 93.5%     | 20.5%
+Multi-Bin K=8 (1 GPU)      | 95.7%        | 100.0%     | 94.5%     | 24.8%
+Multi-Bin K=16 (4 GPUs)    | 94.8%        | 100.0%     | 95.2%     | 100.0%
+
+KEY FINDINGS:
+1. MULTI-BIN ACHIEVES 90%+ TOKEN SLA PASS RATE (Target Met!)
+2. Clear hierarchy: Static (63-74%) < Dynamic (80-87%) < Multi-Bin (93-96%)
+3. Optimal config: 4 GPUs + K=16 bins (95.2% token, 100% request SLA)

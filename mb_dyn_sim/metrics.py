@@ -4,6 +4,24 @@ Metrics computation and analysis.
 Paper-specific metrics:
 - Multi-Bin Batching Paper: tokens_per_second, capacity_threshold_lambda, throughput_improvement
 - Dynamic Batching Paper: decode_step_time, request_rate_qps, capacity_qps_under_SLA
+
+Dual SLA Definition (production-grade + paper-faithful):
+
+1. Per-Request SLA (D_SLA_REQUEST = 150ms):
+   - Total request latency from arrival to completion
+   - Targets interactive use cases (user perceives response time)
+   - Industry standard: 100-200ms for "snappy" feel
+   - Reference: Gemini 2.5 Flash-Lite achieves ~240ms TTFT
+
+2. Per-Token SLA (D_SLA_TOKEN = 5ms):
+   - Time Between Tokens (TBT) for streaming output
+   - Targets smooth streaming experience (200 tokens/sec)
+   - Reference: Gemini 2.5 Flash-Lite achieves 410 tokens/sec (~2.44ms/token)
+   - Paper definition: SLA-constrained dynamic batching
+
+Both metrics are tracked independently to support different use cases:
+- Per-request: Critical for non-streaming, batch processing
+- Per-token: Critical for streaming UX, reading speed matching
 """
 
 import numpy as np
@@ -11,15 +29,26 @@ from typing import List, Dict, Optional
 from .workload import Request
 
 
-def compute_metrics(requests: List[Request]) -> Dict:
+def compute_metrics(requests: List[Request], d_sla_token: float = 0.005, d_sla_request: float = 0.150) -> Dict:
     """
     Compute comprehensive metrics for completed requests.
     
+    Dual SLA evaluation:
+    1. Per-token SLA (TBT): Based on per-token decode latency
+       - D_SLA_TOKEN = 5ms (200 tokens/sec target)
+       - Gemini 2.5 Flash-Lite reference: 2.44ms/token (410 tokens/sec)
+    
+    2. Per-request SLA: Based on total request latency (arrival to completion)
+       - D_SLA_REQUEST = 150ms (interactive response target)
+       - Gemini 2.5 Flash-Lite reference: 240ms TTFT
+    
     Args:
         requests: List of completed requests with timing information
+        d_sla_token: D_SLA_TOKEN threshold for per-token TBT (default 5ms)
+        d_sla_request: D_SLA_REQUEST threshold for total latency (default 150ms)
     
     Returns:
-        Dictionary of metrics including throughput, latency, SLA violations, etc.
+        Dictionary of metrics including throughput, latency, dual SLA violations, etc.
     """
     if not requests:
         return {
@@ -64,9 +93,53 @@ def compute_metrics(requests: List[Request]) -> Dict:
     p99_latency = np.percentile(latencies, 99)
     max_latency = np.max(latencies)
     
-    # SLA violations
-    violations = sum(1 for r in completed if r.violates_sla)
-    sla_violation_rate = violations / num_requests
+    # Per-token TBT (Time Between Tokens) statistics - legacy (includes TTFT)
+    # TBT = service_time / max_output_len_in_batch (computed in simulation)
+    tbt_values = [r.per_token_tbt for r in completed if hasattr(r, 'per_token_tbt') and r.per_token_tbt >= 0]
+    if tbt_values:
+        avg_tbt = np.mean(tbt_values)
+        p50_tbt = np.percentile(tbt_values, 50)
+        p95_tbt = np.percentile(tbt_values, 95)
+        p99_tbt = np.percentile(tbt_values, 99)
+        max_tbt = np.max(tbt_values)
+    else:
+        avg_tbt = p50_tbt = p95_tbt = p99_tbt = max_tbt = 0.0
+    
+    # ===== v2 SLA Model: TTFT and Decode TBT Separation =====
+    # TTFT = Time To First Token (prefill latency, α ≈ 60ms)
+    # Decode TBT = Per-token decode time (β * h(b) ≈ 5.74ms)
+    
+    ttft_values = [r.ttft for r in completed if hasattr(r, 'ttft') and r.ttft >= 0]
+    if ttft_values:
+        avg_ttft = np.mean(ttft_values)
+        p50_ttft = np.percentile(ttft_values, 50)
+        p99_ttft = np.percentile(ttft_values, 99)
+    else:
+        avg_ttft = p50_ttft = p99_ttft = 0.0
+    
+    decode_tbt_values = [r.decode_tbt for r in completed if hasattr(r, 'decode_tbt') and r.decode_tbt >= 0]
+    if decode_tbt_values:
+        avg_decode_tbt = np.mean(decode_tbt_values)
+        p50_decode_tbt = np.percentile(decode_tbt_values, 50)
+        p99_decode_tbt = np.percentile(decode_tbt_values, 99)
+    else:
+        avg_decode_tbt = p50_decode_tbt = p99_decode_tbt = 0.0
+    
+    # ===== DUAL SLA VIOLATIONS =====
+    
+    # 1. Per-token SLA violations (v2: uses decode TBT only, not TTFT)
+    # A request violates per-token SLA if decode_tbt exceeds D_SLA_TOKEN
+    violations_token = sum(1 for r in completed if r.violates_sla)
+    sla_violation_rate_token = violations_token / num_requests
+    
+    # 2. Per-request SLA violations (production-grade definition)
+    # A request violates per-request SLA if total latency exceeds D_SLA_REQUEST
+    violations_request = sum(1 for r in completed if r.violates_sla_request)
+    sla_violation_rate_request = violations_request / num_requests
+    
+    # Legacy alias (backward compatibility - uses per-token)
+    violations = violations_token
+    sla_violation_rate = sla_violation_rate_token
     
     # Queueing and service time
     queueing_delays = [r.queueing_delay for r in completed if r.queueing_delay >= 0]
@@ -127,6 +200,39 @@ def compute_metrics(requests: List[Request]) -> Dict:
         'capacity_qps_under_sla': capacity_qps_under_sla,
         'total_output_tokens': total_output_tokens,
         'avg_output_tokens_per_request': avg_output_tokens,
+        
+        # Per-token TBT (legacy - includes TTFT)
+        'avg_tbt': avg_tbt,           # Average per-token decode latency
+        'p50_tbt': p50_tbt,           # Median per-token decode latency
+        'p95_tbt': p95_tbt,           # 95th percentile TBT
+        'p99_tbt': p99_tbt,           # 99th percentile TBT
+        'max_tbt': max_tbt,           # Maximum TBT observed
+        'tbt_sla_threshold': d_sla_token,   # D_SLA_TOKEN threshold used
+        
+        # ===== v2 SLA Model: TTFT/TBT Separation =====
+        # TTFT = Time To First Token (prefill, α ≈ 60ms)
+        'avg_ttft': avg_ttft,
+        'p50_ttft': p50_ttft,
+        'p99_ttft': p99_ttft,
+        
+        # Decode TBT = Per-token decode time (β * h(b) ≈ 5.74ms)
+        'avg_decode_tbt': avg_decode_tbt,
+        'p50_decode_tbt': p50_decode_tbt,
+        'p99_decode_tbt': p99_decode_tbt,
+        
+        # ===== DUAL SLA METRICS (v2) =====
+        # Per-token SLA (D_SLA_TOKEN, for streaming UX) - uses decode_tbt only
+        'sla_violation_rate_token': sla_violation_rate_token,  # % violating per-token SLA
+        'sla_violations_token': violations_token,              # Count of per-token violations
+        'd_sla_token': d_sla_token,                            # Per-token threshold
+        
+        # Per-request SLA (D_SLA_REQUEST, for interactive response)
+        'sla_violation_rate_request': sla_violation_rate_request,  # % violating per-request SLA
+        'sla_violations_request': violations_request,               # Count of per-request violations
+        'd_sla_request': d_sla_request,                             # Per-request threshold
+        
+        # Token SLA semantic: decode_tbt vs d_sla_token (not total TBT)
+        # This eliminates structural violations where TTFT/L dominates
     }
 
 
@@ -337,9 +443,24 @@ def print_metrics_table(
     print(f"  P99:                 {metrics['p99_latency']:.4f}")
     print(f"  Max:                 {metrics['max_latency']:.4f}")
     
-    print(f"\n[SLA Performance]")
-    print(f"  Violation rate:      {metrics['sla_violation_rate']*100:.2f}%")
-    print(f"  Requests meeting SLA: {metrics['num_requests'] - int(metrics['num_requests'] * metrics['sla_violation_rate'])}")
+    print(f"\n[SLA Performance - Dual Mode]")
+    # Per-token SLA (streaming UX)
+    d_sla_token = metrics.get('d_sla_token', 0.005)
+    sla_viol_token = metrics.get('sla_violation_rate_token', metrics['sla_violation_rate'])
+    print(f"  Per-Token SLA (D={d_sla_token*1000:.1f}ms):")
+    print(f"    Violation rate:    {sla_viol_token*100:.2f}%")
+    print(f"    Requests meeting:  {metrics['num_requests'] - int(metrics['num_requests'] * sla_viol_token)}")
+    print(f"    Avg TBT:           {metrics.get('avg_tbt', 0)*1000:.2f}ms")
+    print(f"    P95 TBT:           {metrics.get('p95_tbt', 0)*1000:.2f}ms")
+    
+    # Per-request SLA (interactive response)
+    d_sla_request = metrics.get('d_sla_request', 0.150)
+    sla_viol_request = metrics.get('sla_violation_rate_request', 0)
+    print(f"  Per-Request SLA (D={d_sla_request*1000:.0f}ms):")
+    print(f"    Violation rate:    {sla_viol_request*100:.2f}%")
+    print(f"    Requests meeting:  {metrics['num_requests'] - int(metrics['num_requests'] * sla_viol_request)}")
+    print(f"    Avg Latency:       {metrics['avg_latency']*1000:.2f}ms")
+    print(f"    P95 Latency:       {metrics['p95_latency']*1000:.2f}ms")
     
     print(f"\n[Queue Statistics]")
     print(f"  Avg queueing delay:  {metrics['avg_queueing_delay']:.4f}s")

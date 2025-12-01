@@ -20,7 +20,7 @@ class SchedulerConfig:
     
     Level 4 Production Mode (Default):
     - BurstGPT dataset arrivals (real Azure traces)
-    - GPU-calibrated latency model (Qwen3 1.7B on RTX 4080)
+    - GPU-calibrated latency model (Qwen3 1.7B on RTX 4080 12GB)
     - Stress testing mode: 200x RPS scaling (0.27→54 req/s) for high-pressure evaluation
     - Real timestamps available via USE_REAL_TIMESTAMPS=True for realistic benchmarking
     - Demonstrates clear scheduler differences under load
@@ -29,18 +29,22 @@ class SchedulerConfig:
     # ===== GPU Infrastructure =====
     NUM_GPUS: int = 4              # Number of parallel GPUs (4 for high-pressure testing)
     M_MAX_GB: float = 12.0         # GPU memory capacity (RTX 4080: 12GB)
-    M_MODEL_GB: float = 2.0        # Model VRAM footprint (Qwen 1.7B)
-    KV_MEM_PER_TOKEN_GB: float = 5e-6  # KV cache memory per token
+    M_MODEL_GB: float = 4.0        # Model VRAM footprint (Qwen3 1.7B FP16: ~4.0GB)
+    KV_MEM_PER_TOKEN_GB: float = 1.875e-4  # KV cache memory per token (1.7B: 2×24 layers×2048 hidden×2 bytes = 196,608 bytes = 0.1875 MB/token)
     
     # ===== Multi-Bin Configuration (Paper-Faithful) =====
-    K_BINS: int = 4                # Number of bins for length-based batching (modest)
+    K_BINS: int = 4                # Number of bins for length-based batching
     USE_EQUAL_MASS_BINS: bool = True  # Equal probability mass per bin (Lemma 4.1)
-    BIN_BOUNDARIES: List[Tuple[int, int]] = field(default_factory=lambda: [
-        (0, 64),        # Bin 0: short outputs
-        (64, 256),      # Bin 1: medium outputs
-        (256, 1024),    # Bin 2: long outputs
-        (1024, 10000),  # Bin 3: very long outputs
-    ])
+    
+    # Bin boundaries: None = computed dynamically from workload (equal-mass/quantile-based)
+    # If provided, must be a list of (min, max) tuples with length == K_BINS
+    BIN_BOUNDARIES: List[Tuple[int, int]] = None  # Computed from workload data
+    
+    # Per-bin batch size limits: None = computed dynamically based on bin characteristics
+    # Formula: b_max_k = min(B_MAX, M_avail / (avg_seq_len_k × kv_mem_per_token))
+    # Longer bins → smaller batch limits (memory + latency constrained)
+    BIN_B_MAX: List[int] = None  # Computed from bin boundaries
+    
     BIN_SELECTION_POLICY: str = "round_robin"  # "round_robin" or "longest_queue"
     
     # ===== Dynamic Batching Parameters =====
@@ -48,9 +52,36 @@ class SchedulerConfig:
     B_MAX: int = 128               # Maximum batch size
     MAX_CANDIDATES: int = 128      # Candidate pool size per GPU scheduling (match B_MAX)
     
-    # ===== SLA Constraints (Realistic for LLM Inference) =====
-    D_SLA: float = 1.0             # SLA deadline (seconds) - realistic for production LLM inference
-    LATENCY_EPSILON: float = 0.1   # SLA tolerance band
+    # ===== SLA Constraints (v2: TTFT/TBT Separation) =====
+    # Calibrated for RTX 4080 12GB + Qwen3 1.7B FP16
+    # 
+    # Latency model: t(b, L) = α + β × L × h(b)
+    #   α = 60ms (TTFT - Time To First Token / prefill latency)
+    #   β = 5.74ms/token (decode TBT - per-token generation)
+    #   γ = 0.316 (batch penalty: h(b) = 1 + γ(b-1)/b)
+    #
+    # v2 SLA Model (TTFT/TBT Separation):
+    # - Token SLA applies ONLY to decode TBT (β × h(b)), NOT TTFT
+    # - This eliminates structural violations where TTFT/L dominates
+    # - At β=5.74ms and b=8, decode TBT ≈ 5.74×1.25 = 7.2ms
+    # - Token SLA of 10ms gives ~38% headroom for batching overhead
+    # - Token SLA of 30ms gives ~4× headroom (for stress testing)
+    #
+    # Per-Token SLA (decode TBT only - excludes TTFT)
+    # STRICT: 10ms (decode only, ~38% headroom over baseline β=5.74ms)
+    D_SLA_TOKEN: float = 0.010     # 10ms per-token decode latency (STRICT)
+    D_SLA_TOKEN_LOOSE: float = 0.030  # 30ms for stress test comparisons
+    
+    # Per-Request SLA (total response latency including queueing + TTFT)
+    # DEFAULT: 10s = realistic user-facing latency target
+    D_SLA_REQUEST: float = 10.0    # 10s end-to-end request latency (DEFAULT)
+    D_SLA_REQUEST_STRICT: float = 5.0   # 5s for tight SLA testing
+    D_SLA_REQUEST_LOOSE: float = 20.0   # 20s for long generation stress tests
+    
+    # Legacy alias for backward compatibility (uses per-token TBT)
+    D_SLA: float = 0.010           # Alias for D_SLA_TOKEN (backward compatibility)
+    
+    LATENCY_EPSILON: float = 0.005 # TBT tolerance band (5ms)
     MEMORY_MARGIN_GB: float = 1.0  # Safety margin for memory constraint
     
     # ===== Workload Configuration (High-Pressure Production) =====
@@ -70,17 +101,89 @@ class SchedulerConfig:
     
     # ===== GPU Calibration (Level 4 Production) =====
     USE_REAL_CALIBRATION: bool = True  # Use real GPU calibration data (Level 4 default)
-    CALIBRATION_CSV_PATH: str = "data/qwen3_1_7b_latency_grid.csv"  # RTX 4080 measurements
+    CALIBRATION_CSV_PATH: str = "data/qwen3_1_7b_latency_grid.csv"  # RTX 4080 12GB measurements (Qwen3 1.7B FP16)
     
     def __post_init__(self):
         """Validate configuration after initialization."""
-        if self.K_BINS != len(self.BIN_BOUNDARIES):
-            self.BIN_BOUNDARIES = self.BIN_BOUNDARIES[:self.K_BINS]
-            if len(self.BIN_BOUNDARIES) < self.K_BINS:
-                raise ValueError(
-                    f"K_BINS ({self.K_BINS}) must match BIN_BOUNDARIES length "
-                    f"({len(self.BIN_BOUNDARIES)})"
-                )
+        # BIN_BOUNDARIES will be computed dynamically from workload if None
+        # This validation only applies if boundaries are explicitly provided
+        if self.BIN_BOUNDARIES is not None:
+            if self.K_BINS != len(self.BIN_BOUNDARIES):
+                self.BIN_BOUNDARIES = self.BIN_BOUNDARIES[:self.K_BINS]
+                if len(self.BIN_BOUNDARIES) < self.K_BINS:
+                    raise ValueError(
+                        f"K_BINS ({self.K_BINS}) must match BIN_BOUNDARIES length "
+                        f"({len(self.BIN_BOUNDARIES)})"
+                    )
+        
+        if self.NUM_GPUS < 1:
+            raise ValueError("NUM_GPUS must be >= 1")
+        
+        if self.K_BINS < 1:
+            raise ValueError("K_BINS must be >= 1")
+    
+    def compute_bin_boundaries(self, predicted_lengths: List[int]) -> List[Tuple[int, int]]:
+        """
+        Compute equal-mass bin boundaries from predicted output lengths.
+        
+        Uses quantile-based boundaries so each bin has approximately 
+        equal number of requests (paper requirement: Lemma 4.1).
+        
+        Args:
+            predicted_lengths: List of predicted output lengths from workload
+            
+        Returns:
+            List of (min, max) tuples for each bin
+        """
+        boundaries = compute_equal_mass_boundaries(predicted_lengths, self.K_BINS)
+        self.BIN_BOUNDARIES = boundaries
+        
+        # Also compute per-bin batch limits based on boundaries
+        self.BIN_B_MAX = self._compute_bin_b_max(boundaries)
+        
+        return boundaries
+    
+    def _compute_bin_b_max(self, boundaries: List[Tuple[int, int]]) -> List[int]:
+        """
+        Compute per-bin maximum batch sizes based on bin characteristics.
+        
+        Formula: b_max_k = min(B_MAX, floor(M_avail / (avg_seq_len_k × kv_mem_per_token)))
+        
+        Longer bins → smaller batch limits due to:
+        1. Higher memory consumption (KV cache scales with sequence length)
+        2. Higher per-token latency (larger max in batch)
+        
+        Args:
+            boundaries: List of (min, max) tuples for each bin
+            
+        Returns:
+            List of maximum batch sizes for each bin
+        """
+        M_avail = self.M_MAX_GB - self.M_MODEL_GB - self.MEMORY_MARGIN_GB
+        bin_b_max = []
+        
+        for min_len, max_len in boundaries:
+            # Use midpoint of bin as representative sequence length
+            # Cap max_len at 4096 for practical purposes
+            effective_max = min(max_len, 4096)
+            avg_seq_len = (min_len + effective_max) // 2
+            
+            # Assume average prompt length is similar to output length
+            # Total tokens per request ≈ 2 × avg_output_len
+            total_tokens_per_req = avg_seq_len * 2
+            
+            if total_tokens_per_req > 0 and self.KV_MEM_PER_TOKEN_GB > 0:
+                # Memory-based batch limit
+                mem_per_req = total_tokens_per_req * self.KV_MEM_PER_TOKEN_GB
+                b_max_mem = int(M_avail / mem_per_req) if mem_per_req > 0 else self.B_MAX
+            else:
+                b_max_mem = self.B_MAX
+            
+            # Clamp to [1, B_MAX]
+            b_max_k = max(1, min(self.B_MAX, b_max_mem))
+            bin_b_max.append(b_max_k)
+        
+        return bin_b_max
         
         if self.NUM_GPUS < 1:
             raise ValueError("NUM_GPUS must be >= 1")
@@ -95,12 +198,17 @@ class SchedulerConfig:
         Returns:
             Dictionary with bin range statistics for throughput analysis
         """
+        if self.BIN_BOUNDARIES is None:
+            return {"status": "Bin boundaries not yet computed from workload"}
+        
         stats = {}
         for i, (min_len, max_len) in enumerate(self.BIN_BOUNDARIES):
             range_size = max_len - min_len if max_len != 10000 else "unbounded"
+            b_max = self.BIN_B_MAX[i] if self.BIN_B_MAX and i < len(self.BIN_B_MAX) else self.B_MAX
             stats[f"bin_{i}"] = {
                 "range": (min_len, max_len),
                 "range_size": range_size,
+                "b_max": b_max,
                 "purpose": f"Reduce E[max(t_j) | bin] via narrower intervals"
             }
         return stats

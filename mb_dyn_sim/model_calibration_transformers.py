@@ -2,7 +2,8 @@
 Real GPU Calibration Module using Hugging Face Transformers
 
 Alternative to vLLM for Windows users with CUDA support.
-Measures actual batch latency on RTX 4080 using HuggingFace Transformers.
+Measures actual batch latency on RTX 4080 12GB using HuggingFace Transformers.
+Default model: Qwen3 1.7B FP16 (~4.0GB VRAM)
 """
 
 from typing import Optional, List

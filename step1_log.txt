@@ -1,0 +1,1204 @@
+================================================================================
+TWO-STEP STRESS TESTING FOR LLM INFERENCE OPTIMIZATION
+================================================================================
+RPS Scaling: 200.0x
+SLA Target: 50ms per token
+
+
+================================================================================
+STEP 1: MULTI-BIN + DYNAMIC GRID SEARCH
+================================================================================
+Request counts: ['1,000', '10,000', '100,000', '1,000,000']
+GPU counts: [1, 2, 4, 8, 16, 32, 64, 100]
+Bin counts: [1, 2, 4, 8, 16, 32]
+Total combinations: 192
+
+
+============================================================
+REQUEST COUNT: 1,000
+============================================================
+
+[1/192] GPUs=1, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3169 tok/s, P95 Lat: 1.119s, GPU Util: 38.2% [0.0s]
+
+[2/192] GPUs=1, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3169 tok/s, P95 Lat: 1.381s, GPU Util: 38.5% [0.0s]
+
+[3/192] GPUs=1, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3169 tok/s, P95 Lat: 1.474s, GPU Util: 38.9% [0.1s]
+
+[4/192] GPUs=1, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3167 tok/s, P95 Lat: 2.127s, GPU Util: 40.1% [0.0s]
+
+[5/192] GPUs=1, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3166 tok/s, P95 Lat: 3.414s, GPU Util: 40.8% [0.0s]
+
+[6/192] GPUs=1, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3166 tok/s, P95 Lat: 6.279s, GPU Util: 42.0% [0.0s]
+
+[7/192] GPUs=2, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3172 tok/s, P95 Lat: 0.869s, GPU Util: 26.9% [0.0s]
+
+[8/192] GPUs=2, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3172 tok/s, P95 Lat: 0.779s, GPU Util: 27.3% [0.0s]
+
+[9/192] GPUs=2, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3173 tok/s, P95 Lat: 0.788s, GPU Util: 27.4% [0.0s]
+
+[10/192] GPUs=2, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3173 tok/s, P95 Lat: 0.967s, GPU Util: 28.1% [0.1s]
+  [Saved 10 results to step1_grid_search_results.csv]
+
+[11/192] GPUs=2, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3172 tok/s, P95 Lat: 1.164s, GPU Util: 28.7% [0.0s]
+
+[12/192] GPUs=2, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3172 tok/s, P95 Lat: 1.667s, GPU Util: 29.4% [0.1s]
+
+[13/192] GPUs=4, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.527s, GPU Util: 16.2% [0.0s]
+
+[14/192] GPUs=4, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.493s, GPU Util: 16.3% [0.0s]
+
+[15/192] GPUs=4, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.472s, GPU Util: 16.4% [0.1s]
+
+[16/192] GPUs=4, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.491s, GPU Util: 16.4% [0.0s]
+
+[17/192] GPUs=4, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.496s, GPU Util: 16.5% [0.1s]
+
+[18/192] GPUs=4, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.508s, GPU Util: 16.6% [0.1s]
+
+[19/192] GPUs=8, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.0s]
+
+[20/192] GPUs=8, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.0s]
+  [Saved 20 results to step1_grid_search_results.csv]
+
+[21/192] GPUs=8, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.1s]
+
+[22/192] GPUs=8, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.1s]
+
+[23/192] GPUs=8, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.1s]
+
+[24/192] GPUs=8, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 8.4% [0.1s]
+
+[25/192] GPUs=16, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+
+[26/192] GPUs=16, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+
+[27/192] GPUs=16, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+
+[28/192] GPUs=16, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+
+[29/192] GPUs=16, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+
+[30/192] GPUs=16, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 4.2% [0.1s]
+  [Saved 30 results to step1_grid_search_results.csv]
+
+[31/192] GPUs=32, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[32/192] GPUs=32, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[33/192] GPUs=32, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[34/192] GPUs=32, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[35/192] GPUs=32, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[36/192] GPUs=32, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 2.1% [0.1s]
+
+[37/192] GPUs=64, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.1s]
+
+[38/192] GPUs=64, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.1s]
+
+[39/192] GPUs=64, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.1s]
+
+[40/192] GPUs=64, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.1s]
+  [Saved 40 results to step1_grid_search_results.csv]
+
+[41/192] GPUs=64, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.1s]
+
+[42/192] GPUs=64, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 1.1% [0.2s]
+
+[43/192] GPUs=100, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.1s]
+
+[44/192] GPUs=100, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.1s]
+
+[45/192] GPUs=100, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.1s]
+
+[46/192] GPUs=100, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.1s]
+
+[47/192] GPUs=100, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.1s]
+
+[48/192] GPUs=100, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 1000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 3174 tok/s, P95 Lat: 0.455s, GPU Util: 0.7% [0.2s]
+
+============================================================
+REQUEST COUNT: 10,000
+============================================================
+
+[49/192] GPUs=1, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5408 tok/s, P95 Lat: 1.157s, GPU Util: 57.8% [0.3s]
+
+[50/192] GPUs=1, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5408 tok/s, P95 Lat: 1.403s, GPU Util: 58.2% [0.3s]
+  [Saved 50 results to step1_grid_search_results.csv]
+
+[51/192] GPUs=1, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5408 tok/s, P95 Lat: 1.572s, GPU Util: 58.7% [0.3s]
+
+[52/192] GPUs=1, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5407 tok/s, P95 Lat: 2.319s, GPU Util: 59.7% [0.3s]
+
+[53/192] GPUs=1, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5406 tok/s, P95 Lat: 3.782s, GPU Util: 60.8% [0.3s]
+
+[54/192] GPUs=1, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5398 tok/s, P95 Lat: 6.865s, GPU Util: 62.1% [0.3s]
+
+[55/192] GPUs=2, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.840s, GPU Util: 43.5% [0.3s]
+
+[56/192] GPUs=2, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.806s, GPU Util: 44.2% [0.3s]
+
+[57/192] GPUs=2, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.822s, GPU Util: 44.5% [0.4s]
+
+[58/192] GPUs=2, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.978s, GPU Util: 45.3% [0.4s]
+
+[59/192] GPUs=2, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 1.315s, GPU Util: 46.2% [0.4s]
+
+[60/192] GPUs=2, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 5409 tok/s, P95 Lat: 2.114s, GPU Util: 47.1% [0.4s]
+  [Saved 60 results to step1_grid_search_results.csv]
+
+[61/192] GPUs=4, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.547s, GPU Util: 27.2% [0.4s]
+
+[62/192] GPUs=4, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.508s, GPU Util: 27.4% [0.4s]
+
+[63/192] GPUs=4, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.504s, GPU Util: 27.5% [0.4s]
+
+[64/192] GPUs=4, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.508s, GPU Util: 27.6% [0.4s]
+
+[65/192] GPUs=4, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.516s, GPU Util: 27.8% [0.4s]
+
+[66/192] GPUs=4, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.542s, GPU Util: 28.0% [0.4s]
+
+[67/192] GPUs=8, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.465s, GPU Util: 14.3% [0.4s]
+
+[68/192] GPUs=8, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 14.3% [0.4s]
+
+[69/192] GPUs=8, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 14.3% [0.4s]
+
+[70/192] GPUs=8, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 14.3% [0.4s]
+  [Saved 70 results to step1_grid_search_results.csv]
+
+[71/192] GPUs=8, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 14.3% [0.5s]
+
+[72/192] GPUs=8, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 14.3% [0.5s]
+
+[73/192] GPUs=16, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.4s]
+
+[74/192] GPUs=16, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.4s]
+
+[75/192] GPUs=16, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.5s]
+
+[76/192] GPUs=16, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.5s]
+
+[77/192] GPUs=16, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.5s]
+
+[78/192] GPUs=16, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 7.2% [0.6s]
+
+[79/192] GPUs=32, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.5s]
+
+[80/192] GPUs=32, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.5s]
+  [Saved 80 results to step1_grid_search_results.csv]
+
+[81/192] GPUs=32, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.5s]
+
+[82/192] GPUs=32, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.6s]
+
+[83/192] GPUs=32, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.7s]
+
+[84/192] GPUs=32, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 3.6% [0.9s]
+
+[85/192] GPUs=64, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [0.5s]
+
+[86/192] GPUs=64, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [0.6s]
+
+[87/192] GPUs=64, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [0.7s]
+
+[88/192] GPUs=64, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [0.8s]
+
+[89/192] GPUs=64, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [1.0s]
+
+[90/192] GPUs=64, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.8% [1.4s]
+  [Saved 90 results to step1_grid_search_results.csv]
+
+[91/192] GPUs=100, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [0.7s]
+
+[92/192] GPUs=100, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=2 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [0.7s]
+
+[93/192] GPUs=100, K_BINS=4
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=4 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [0.8s]
+
+[94/192] GPUs=100, K_BINS=8
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=8 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [1.0s]
+
+[95/192] GPUs=100, K_BINS=16
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=16 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [1.3s]
+
+[96/192] GPUs=100, K_BINS=32
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 10000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=32 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.1%, Throughput: 5409 tok/s, P95 Lat: 0.463s, GPU Util: 1.1% [2.0s]
+
+============================================================
+REQUEST COUNT: 100,000
+============================================================
+
+[97/192] GPUs=1, K_BINS=1
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 100000 requests from dataset
+SLA thresholds: Per-token=50.0ms, Per-request=10000.0ms
+Applying RPS scaling factor: 200.00x
+Using real GPU calibration from: data/qwen3_1_7b_latency_grid.csv
+Warning: scipy not available for fitting: No module named 'scipy'
+Install with: pip install scipy
+LatencyModel info: {'calibrated': False, 'method': 'synthetic', 'alpha': 0.01, 'beta': 0.0002, 'gamma': 0.3}
+[Scheduler Init] multi_bin_dynamic: K_BINS=1 + DynamicBatcher (SLA controller)
+  -> SLA Viol: 0.0%, Throughput: 12121 tok/s, P95 Lat: 866.736s, GPU Util: 69.8% [2.5s]
+
+[98/192] GPUs=1, K_BINS=2
+Loading BurstGPT dataset from: data/BurstGPT_sample.csv
+Loaded 100000 requests from dataset

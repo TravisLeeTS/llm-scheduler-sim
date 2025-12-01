@@ -1,155 +1,58 @@
 # Multi-Bin Dynamic Batching Scheduler for LLM Inference
 
-**Paper-faithful** discrete-event simulator implementing exact algorithms from:
+A **paper-faithful** discrete-event simulator implementing algorithms from:
 1. **Multi-Bin Batching for LLM Inference Throughput Optimization**
 2. **Memory-Aware and SLA-Constrained Dynamic Batching for LLM Inference**
 
-✅ **Validated with Real BurstGPT Dataset** (Azure traces with 1.4M+ requests)  
-✅ **GPU Calibration Ready** (RTX 4080 + CUDA 12.6 + Transformers/vLLM)  
-✅ **Three Scheduler Modes** (static_fifo, dynamic_no_bins, multi_bin_dynamic)  
-✅ **Performance Optimized** (3-10x speedup with workload/bin caching)  
-✅ **Bug Fixed** (K-bins sensitivity tests now work for K=8,16,32)
+## Features
+
+✅ **Real BurstGPT Dataset** - Azure ChatGPT traces (1.43M+ requests)  
+✅ **GPU-Calibrated Latency** - Qwen3 1.7B on RTX 4080 12GB (R²=0.9995)  
+✅ **Three Scheduler Modes** - static_fifo, dynamic_no_bins, multi_bin_dynamic  
+✅ **Dual SLA Model** - Per-token (10ms) and Per-request (20s) SLA tracking  
+✅ **Performance Optimized** - Workload caching, incremental saves  
 
 ---
 
 ## Quick Start
 
 ### 1. Install Dependencies
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
-**Required packages:** numpy, pandas, matplotlib, scipy, tqdm
-
-### 2. Run Comprehensive Stress Test (3-Step Research Plan)
-
-**⚡ NEW: Optimized Version Available (3-10x faster!)**
-
-```powershell
-# OPTIMIZED VERSION (recommended - 3-10x speedup)
-python scripts/comprehensive_stress_test_optimized.py
-
-# Original version (still works, but slower)
-python scripts/comprehensive_stress_test.py
-```
-
-See [OPTIMIZATION_SUMMARY.md](OPTIMIZATION_SUMMARY.md) for performance details!
-
-**Individual steps:**
-```powershell
-# Step 1 only: Request scaling 1K→1M (multi-bin tested with 1,2,4 GPUs)
-python scripts/comprehensive_stress_test_optimized.py --step1-only
-
-# Step 2 only: GPU scaling 1-100 GPUs for 1M requests
-python scripts/comprehensive_stress_test_optimized.py --step2-only
-
-# Step 3 only: K-bins sensitivity analysis (1,2,4,8,16,32)
-python scripts/comprehensive_stress_test_optimized.py --step3-only --best-gpu-count 32
-```
-
-### 3. Quick Single Experiments
-```powershell
-# Quick comparison of all schedulers
+### 2. Run Quick Comparison
+```bash
 python scripts/run_mb_dynamic.py --compare --num-requests 1000
-
-# Realistic benchmarking with REAL timestamps (low pressure)
-python scripts/comprehensive_stress_test_optimized.py --use-real-timestamps --max-requests 100000
 ```
 
-**Documentation:**
-- [COMPREHENSIVE_STRESS_TEST_3STEP.md](COMPREHENSIVE_STRESS_TEST_3STEP.md) - Full test suite guide
-- [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md) - K-bins impact analysis & SLA calculation insights
-- [OPTIMIZATION_SUMMARY.md](OPTIMIZATION_SUMMARY.md) - Performance optimizations (3-10x speedup)
-- [BUGFIX_KBINS.md](BUGFIX_KBINS.md) - K-bins sensitivity fix (K=8,16,32)
-- [BUGFIX_INCREMENTAL_SAVE.md](BUGFIX_INCREMENTAL_SAVE.md) - Incremental workflow fix
+### 3. Run Two-Step Evaluation
+```bash
+# Step 1: Grid Search (192 configurations)
+python scripts/step1_low_load.py
 
-**Expected Performance:**
-- Full test suite (39 tests): ~24 min (optimized) vs ~33 min (original)
-- Step 1 (25 tests): ~4 min (optimized) vs ~6 min (original)
-- Workload caching: 25x faster (load once vs load per test)
-- Incremental workflow: Run steps individually, results accumulate
+# Step 2: Method Comparison (4 methods × 4 workloads)
+python scripts/step2_low_load.py
+```
 
 ---
 
-## Features
+## Three Scheduler Modes
 
-### ✅ Paper-Faithful Algorithms
+### 1. `static_fifo` - Baseline
+- Single FIFO queue with fixed batch size (B=8)
+- No dynamic adaptation
 
-**From Multi-Bin Batching Paper:**
-- Equal-mass bin boundaries (empirical quantiles)
-- Fixed batch size B for paper validation
-- Throughput scaling with K_BINS
+### 2. `dynamic_no_bins` - Dynamic Batching
+- Single FIFO queue with SLA controller
+- Adaptive batch sizing: `b_target = min(b_mem, b_SLA)`
 
-**From Dynamic Batching Paper:**
-- Algorithm 1: Memory constraint `b_mem = ⌊(η-L₀)/μ⌋`
-- Algorithm 2: SLA controller with adaptive `[b_low, b_high]` search
-- Final: `b_target = min(b_mem, b_SLA)`
+### 3. `multi_bin_dynamic` - Our Contribution
+- K bins partition requests by predicted output length
+- **Bin-specific** statistics and SLA controllers
+- Better batch composition → higher throughput
 
-**Additional:**
-- Service time: max-dominates property
-- Feedback loops: `update_after_batch()`
-- Event-driven discrete-event simulation
-
-### 📊 Three Scheduler Modes
-
-1. **`static_fifo`** - Fixed batch size (B=8), no dynamic batching, baseline
-2. **`dynamic_no_bins`** - Single queue with global SLA controller + memory constraint
-3. **`multi_bin_dynamic`** - K=8 bins (default) + **bin-specific** dynamic batching (our contribution)
-
-### 🎯 Multi-Bin with Bin-Specific Intelligence
-
-The `multi_bin_dynamic` scheduler implements three key innovations:
-
-1. **Composition Control** - Bins partition requests by predicted output length
-   - Bin 0: [0, 64] tokens (short)
-   - Bin 1: [64, 256] tokens (medium)
-   - Bin 2: [256, 1024] tokens (long)
-   - Bin 3: [1024+] tokens (very long)
-
-2. **Bin-Specific Adaptation** - Each bin maintains separate controllers
-   - **Per-bin statistics**: Each bin learns its own avg_prompt_len, avg_output_len
-   - **Per-bin SLA controllers**: Each bin adapts batch size independently
-   - Bin 0 learns: "I can handle large batches" (fast, predictable)
-   - Bin 3 learns: "I need small batches" (slow, high variance)
-
-3. **Mathematical Foundation**
-   - Bins reduce E[max(t_j) | bin] via narrower length distributions
-   - max(B jobs from [10, 20]) << max(B jobs from [10, 200])
-   - Throughput_k = B / E[T_batch,k] increases with k
-   - Each bin optimizes for its own characteristics
-
-## 🎯 Production Configuration (Level 4 - Stress Testing)
-
-**Current Setup**: High-pressure stress testing with option for realistic benchmarking
-
-| Component | Implementation | Benefit |
-|-----------|----------------|------------|
-| **Workload** | BurstGPT dataset (1K-1M real Azure ChatGPT traces) | Realistic request patterns and distributions |
-| **Arrival Pattern** | **RPS Scaling 200x** (stress testing mode) ⭐ | High-pressure evaluation (~54 req/s vs 0.27 real) |
-| **Latency Model** | GPU-calibrated from RTX 4080 (Qwen3 1.7B) | Production-accurate service times |
-| **Configuration** | 1.0s SLA (realistic LLM inference target) | Real-world constraint |
-| **Schedulers** | Three types: static_fifo, dynamic_no_bins, multi_bin_dynamic | Clear performance differentiation |
-| **Validity** | ✓✓✓✓ Maximum realism + stress testing ⭐ | Publication-ready results |
-
-**Two Testing Modes:**
-
-1. **RPS Scaling** (default - stress testing): Artificially compress arrival times 200x
-   - Use: Default (or explicit `--use-rps-scaling`)
-   - Benefit: High-pressure testing, clear scheduler differences
-   - Arrival rate: ~54 req/s (200x faster than real 0.27 req/s)
-   - **Finding breaking points and performance limits**
-   
-2. **Real Timestamps** (optional - realistic benchmarking): Preserve actual Azure patterns
-   - Use: `--use-real-timestamps`
-   - Benefit: Realistic bursty patterns, natural quiet periods
-   - Arrival rate: ~0.27 req/s (actual production rate)
-   - **Realistic production behavior**
-
-**Why RPS Scaling by Default?**
-- Real arrival rate is very low (0.27 req/s = 16 req/min)
-- Low pressure doesn't differentiate schedulers well (all perform similarly)
-- 200x scaling creates meaningful load (~54 req/s) to find limits
-- Preserves bursty patterns while increasing pressure
+**Key Innovation**: Multi-bin reduces E[max(t_j) | bin] by grouping similar-length requests, allowing larger batches while maintaining SLA.
 
 ---
 
@@ -157,220 +60,162 @@ The `multi_bin_dynamic` scheduler implements three key innovations:
 
 ```
 llm_scheduler_sim/
-├── mb_dyn_sim/           # Core simulator
-│   ├── config.py         # Configuration + equal-mass boundaries
-│   ├── schedulers.py     # SLAController, DynamicBatcher, MultiBinScheduler
-│   ├── simulation.py     # Discrete-event simulation engine
-│   ├── workload.py       # BurstGPT loading + Poisson generation
-│   ├── model_calibration.py  # vLLM calibration support
-│   ├── metrics.py        # Performance metrics
-│   └── experiments.py    # Plotting and analysis
-│
+├── mb_dyn_sim/                    # Core simulator
+│   ├── config.py                  # Configuration parameters
+│   ├── schedulers.py              # Scheduler implementations
+│   ├── simulation.py              # Discrete-event simulator
+│   ├── workload.py                # Workload generation
+│   ├── model_calibration.py       # GPU latency model
+│   └── metrics.py                 # Performance metrics
 ├── scripts/
-│   ├── run_mb_dynamic.py                  # Main experiment runner ⭐
-│   └── calibrate_real_gpu_transformers.py # GPU calibration (Windows)
-│
+│   ├── run_mb_dynamic.py          # Main experiment runner
+│   ├── comprehensive_stress_test_optimized.py  # Stress test suite
+│   └── download_burstgpt.py       # Download BurstGPT dataset
 ├── data/
-│   ├── BurstGPT_sample.csv       # Real Azure traces (download)
-│   └── README.md                  # Dataset format spec
-│
-├── ARCHITECTURE.md       # Complete process flow documentation ⭐
-├── CUDA_SETUP_COMPLETE.md # GPU calibration setup guide
-└── README.md             # This file
+│   ├── BurstGPT_sample.csv        # Real Azure traces
+│   └── qwen3_1_7b_latency_grid.csv # GPU calibration data
+└── docs/                          # Documentation (MD files)
 ```
+
+---
+
+## Configuration
+
+### Key Parameters (`mb_dyn_sim/config.py`)
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `NUM_GPUS` | 4 | Number of GPUs |
+| `K_BINS` | 4 | Number of bins for multi_bin_dynamic |
+| `D_SLA` | 0.05 | Per-token decode latency SLA (50ms) |
+| `B_MAX` | 128 | Maximum batch size |
+| `M_MAX_GB` | 12.0 | GPU memory (RTX 4080) |
+| `USE_REAL_TIMESTAMPS` | False | True = real arrival times, False = RPS scaling |
+| `RPS_SCALING` | 200.0 | RPS multiplier (when USE_REAL_TIMESTAMPS=False) |
+
+### Arrival Modes
+
+- **RPS Scaling** (default): Compress arrival times 200x for stress testing
+- **Real Timestamps**: Use actual Azure arrival patterns for realistic benchmarking
 
 ---
 
 ## Usage Examples
 
-### Test with Real BurstGPT Data
-```powershell
-python scripts/run_mb_dynamic.py `
-    --arrival-profile burstgpt_dataset `
-    --num-requests 5000 `
-    --compare
+### Download BurstGPT Dataset
+```bash
+python scripts/download_burstgpt.py --version 1
 ```
 
-### Compare All Three Modes
-```powershell
-python scripts/run_mb_dynamic.py --num-requests 5000 --compare
+### Run Individual Schedulers
+```bash
+python scripts/run_mb_dynamic.py --scheduler static_fifo --num-requests 5000
+python scripts/run_mb_dynamic.py --scheduler dynamic_no_bins --num-requests 5000
+python scripts/run_mb_dynamic.py --scheduler multi_bin_dynamic --num-requests 5000
 ```
 
-### K_BINS Sensitivity Analysis
-```powershell
-for ($K in 1,2,4,8) {
-    python scripts/run_mb_dynamic.py --k-bins $K --num-requests 5000
-}
+### K-Bins Sensitivity Analysis
+```bash
+python scripts/run_mb_dynamic.py --k-bins 2 --num-requests 5000
+python scripts/run_mb_dynamic.py --k-bins 4 --num-requests 5000
+python scripts/run_mb_dynamic.py --k-bins 8 --num-requests 5000
 ```
 
-### Use BurstGPT Dataset
-```powershell
-python scripts/run_mb_dynamic.py `
-    --arrival-profile burstgpt_dataset `
-    --dataset-path data/BurstGPT_sample.csv `
-    --num-requests 10000 `
-    --compare
+### Custom SLA
+```bash
+python scripts/run_mb_dynamic.py --compare --d-sla 0.1 --num-requests 1000
 ```
-
----
-
-## GPU Calibration (Optional)
-
-For Level 3 fidelity with real GPU measurements:
-
-### 1. Check CUDA Setup
-```powershell
-python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, GPU: {torch.cuda.get_device_name(0)}')"
-```
-
-### 2. Run GPU Calibration (Windows: Transformers, Linux: vLLM)
-```powershell
-# Windows (Transformers)
-python scripts/calibrate_real_gpu_transformers.py --model Qwen/Qwen2.5-1.5B --trials 3
-
-# Linux (vLLM - not supported on Windows, advanced users only)
-# pip install vllm
-# (Use transformers script above for Windows)
-```
-
-### 3. Run Simulation with Calibrated Latency
-```powershell
-python scripts/run_mb_dynamic.py `
-    --use-real-calibration `
-    --calibration-csv data/qwen2_5_1_5b_latency_grid.csv `
-    --compare
-```
-
-See `CUDA_SETUP_COMPLETE.md` for detailed GPU setup instructions.
-
----
-
-## Latest Results (Real Timestamps)
-
-### Comprehensive Test: 1K-1M Requests with Real Azure Arrival Patterns
-
-**Configuration**: Real timestamps from BurstGPT dataset, 1.0s SLA, GPU-calibrated latency
-
-#### Request Scaling (1 GPU baseline, 4 GPUs multi-bin)
-
-| Scheduler | Requests | GPUs | SLA Violations | Avg Latency | Capacity QPS | GPU Util |
-|-----------|----------|------|----------------|-------------|--------------|----------|
-| static_fifo | 1K | 1 | 0.4% | 0.25s | 0.02 | 0.5% |
-| static_fifo | 100K | 1 | **14.6%** | 0.42s | 0.10 | 2.2% |
-| dynamic_no_bins | 1K | 1 | 0.4% | 0.25s | 0.02 | 0.5% |
-| dynamic_no_bins | 100K | 1 | **12.3%** | 0.42s | 0.10 | 2.3% |
-| **multi_bin_dynamic** | **1K** | **4** | **0.1%** | **0.25s** | **0.02** | **0.1%** |
-| **multi_bin_dynamic** | **100K** | **4** | **1.7%** | **0.22s** | **0.12** | **0.6%** |
-| **multi_bin_dynamic** | **1M** | **4** | **4.9%** | **0.30s** | **0.26** | **1.7%** |
-
-#### GPU Scaling (1M requests, multi-bin only)
-
-| GPUs | SLA Violations | Avg Latency | Capacity QPS | GPU Util | Scaling Efficiency |
-|------|----------------|-------------|--------------|----------|--------------------|
-| 4 | 4.9% | 0.30s | 0.26 | 1.7% | baseline |
-| 8 | 3.7% | 0.27s | 0.26 | 0.9% | 51% |
-| 64 | 3.0% | 0.26s | 0.26 | 0.1% | **6%** |
-
-### Key Findings with Real Timestamps
-
-**Real Production Patterns:**
-- ✅ **Low pressure**: Real Azure traces don't overwhelm the system (0.5-2.3% GPU utilization)
-- ✅ **Realistic SLA**: 1.0s SLA is achievable for production LLM inference
-- ✅ **Bursty patterns**: Real timestamps preserve quiet periods and bursts
-- ✅ **Natural load**: 0.02-0.26 req/s capacity matches actual production rates
-
-**Multi-Bin Advantage at Scale:**
-- 🏆 **88% fewer violations** at 100K requests (1.7% vs 14.6% for static)
-- 🏆 **48% lower latency** at 100K requests (0.22s vs 0.42s)
-- 🏆 **Scales to 1M requests** with only 4.9% violations
-- 🏆 **Bin-specific learning** adapts to each length category independently
-
-**GPU Scaling Reality:**
-- ⚠️ **Limited scaling**: Real traces don't saturate multiple GPUs (6% efficiency at 64 GPUs)
-- ⚠️ **Arrival rate limited**: Production workload isn't concurrent enough for massive parallelism
-- ✅ **4-8 GPUs optimal**: Sweet spot for real production traces
-
-**Bin-Specific Intelligence:**
-- Each bin maintains separate BatchStatistics and SLAController
-- Bin 0 (short): Learns to use larger batches (fast, predictable)
-- Bin 3 (long): Learns to use smaller batches (slow, high variance)
-- Narrower distributions per bin → smaller E[max(t_j)] → better throughput
-
----
-
-## Key Configuration Parameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `NUM_GPUS` | 4 | Number of GPUs |
-| `NUM_REQUESTS` | 10000 | Number of requests (1K-1M for stress tests) |
-| `K_BINS` | 4 | Number of multi-bin queues |
-| `D_SLA` | 1.0 | SLA deadline (seconds) - realistic for LLM inference |
-| `USE_REAL_TIMESTAMPS` | False | False=RPS scaling (stress), True=real timestamps (realistic) ⭐ |
-| `RPS_SCALING` | 200.0 | RPS scaling factor (200x = 0.27→54 req/s for stress testing) |
-| `B_MAX` | 128 | Maximum dynamic batch size |
-| `M_MAX_GB` | 12.0 | GPU memory (GB) |
-| `EXPERIMENT_MODE` | "multi_bin_dynamic" | Mode selection |
-
-See `mb_dyn_sim/config.py` for all options.
-
----
-
-## Testing
-
-### Quick Validation
-
-Verify the simulator is working correctly:
-
-```powershell
-# Quick test with 500 requests (~30 seconds)
-python scripts/run_mb_dynamic.py --num-requests 500 --compare
-
-# Standard test with 1000 requests (~1-2 minutes)
-python scripts/run_mb_dynamic.py --num-requests 1000 --compare
-
-# Full high-pressure test (10K requests, ~3-5 minutes)
-python scripts/run_mb_dynamic.py --compare
-
-# Test with custom SLA
-python scripts/run_mb_dynamic.py --compare --d-sla 0.3 --num-requests 1000
-```
-
-### Test Bin-Specific Batching
-
-Verify that each bin maintains separate statistics and controllers:
-
-```powershell
-python test_bin_specific.py
-```
-
-**Expected output:**
-```
-✓ Each bin maintains SEPARATE statistics and SLA controllers
-✓ Bin 0 (short) learns from short request batches
-✓ Bin 3 (long) learns from long request batches
-✓ Bins adapt batch size independently based on their E[max(t_j)]
-```
-
-**What Gets Validated:**
-- ✅ All three scheduler modes produce distinct results
-- ✅ SLA violations: multi_bin_dynamic < dynamic_no_bins ≈ static_fifo
-- ✅ Capacity under SLA: multi_bin_dynamic > others
-- ✅ Workload generation from BurstGPT dataset
-- ✅ Equal-mass bin boundary computation
-- ✅ Bin-specific statistics and controllers
-- ✅ GPU calibration data loading (if available)
 
 ---
 
 ## Documentation
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Complete process flows for all 3 scheduler types ⭐
-- **[BIN_SPECIFIC_BATCHING.md](BIN_SPECIFIC_BATCHING.md)** - Bin-specific dynamic batching enhancement ⭐
-- **[METRICS_GUIDE.md](METRICS_GUIDE.md)** - Paper-aligned performance metrics reference ⭐
-- **[README.md](README.md)** - This file: overview and quick start
-- **[CUDA_SETUP_COMPLETE.md](CUDA_SETUP_COMPLETE.md)** - GPU calibration setup guide
-- **[data/README.md](data/README.md)** - Dataset format specification
+### Primary Documents (Start Here)
+
+| File | Description |
+|------|-------------|
+| **[METHODOLOGY.md](METHODOLOGY.md)** | **Complete research methodology** - data sources, algorithms, experimental design |
+| **[EXPERIMENTS.md](EXPERIMENTS.md)** | **Detailed experimental protocol** - Step 1 grid search, Step 2 comparison |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | System architecture and process flows |
+
+### Technical Reference
+
+| File | Description |
+|------|-------------|
+| [LATENCY_MODEL_AND_SLA.md](LATENCY_MODEL_AND_SLA.md) | Latency model derivation and SLA framework |
+| [METRICS_GUIDE.md](METRICS_GUIDE.md) | Performance metrics computation |
+| [GPU_SPECIFICATIONS.md](GPU_SPECIFICATIONS.md) | Hardware specifications |
+| [data/README.md](data/README.md) | Dataset format specification |
+
+### Analysis Documents
+
+| File | Description |
+|------|-------------|
+| [COMPREHENSIVE_STRESS_TEST_3STEP.md](COMPREHENSIVE_STRESS_TEST_3STEP.md) | Legacy stress test guide |
+| [KBINS_PERFORMANCE_ANALYSIS.md](KBINS_PERFORMANCE_ANALYSIS.md) | K-bins sensitivity analysis |
+| [INDUSTRY_METRICS_VALIDATION.md](INDUSTRY_METRICS_VALIDATION.md) | Industry benchmark comparison |
+
+### Algorithm Specifications
+
+| File | Description |
+|------|-------------|
+| [ALGORITHMS.md](ALGORITHMS.md) | **Formal algorithm pseudocode** - all 7 core algorithms |
+
+---
+
+## Research Paper Writing Guide
+
+### For "Methodology / Materials and Methods" Section
+
+**Primary document to reference**: [METHODOLOGY.md](METHODOLOGY.md)
+
+This covers:
+1. ✅ Research overview and hypotheses
+2. ✅ System architecture
+3. ✅ Data sources (BurstGPT dataset)
+4. ✅ Latency model derivation
+5. ✅ All 7 scheduling algorithms (pseudocode in [ALGORITHMS.md](ALGORITHMS.md))
+6. ✅ Dual SLA framework (token + request)
+7. ✅ Experimental design (Step 1 grid search + Step 2 comparison)
+8. ✅ Implementation details
+9. ✅ Evaluation metrics
+10. ✅ Reproducibility information
+
+### Document Reading Order
+
+For comprehensive understanding:
+
+```
+1. README.md          ← Start here (overview)
+2. METHODOLOGY.md     ← Complete methodology (main reference)
+3. ALGORITHMS.md      ← Formal algorithm specifications
+4. EXPERIMENTS.md     ← Detailed experimental protocol
+5. LATENCY_MODEL_AND_SLA.md ← Latency model derivation
+6. ARCHITECTURE.md    ← System architecture diagrams
+7. METRICS_GUIDE.md   ← Metrics computation details
+```
+
+---
+
+## SLA Definition
+
+### Dual SLA Model (v2)
+
+| SLA Type | Metric | Threshold | Purpose |
+|----------|--------|-----------|---------|
+| **Per-Token SLA** | Decode TBT (β·h(b)) | 10ms | Streaming UX |
+| **Per-Request SLA** | Total latency | 20s | Interactive response |
+
+**Key Innovation**: Token SLA applies ONLY to decode TBT, NOT TTFT (prefill latency).
+
+### Calibrated Parameters (RTX 4080 12GB + Qwen3 1.7B)
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| α (TTFT) | 59.65ms | Time To First Token (prefill) |
+| β (TBT) | 5.74ms/token | Per-token decode time |
+| γ (penalty) | 0.316 | Batch overhead factor |
+| R² | 0.9995 | Model fit quality |
 
 ---
 
@@ -383,10 +228,22 @@ This simulator follows the **wind tunnel testing** approach:
 | Cost | $$$ (GPU cluster) | Free (CPU only) |
 | Speed | Days/weeks | Seconds |
 | Risk | User-facing | Zero (offline) |
-| Iteration | Slow (A/B tests) | Fast (experiments) |
 | **Validity** | **Absolute numbers** | **Relative rankings** ✓ |
 
-**Key Principle:** The simulator preserves algorithmic fidelity for valid scheduler comparisons, even with synthetic service times.
+The simulator preserves algorithmic fidelity for valid scheduler comparisons.
+
+---
+
+## FAQ
+
+**Q: Do I need a GPU?**  
+A: No. The simulator runs on CPU with pre-calibrated latency data.
+
+**Q: Do I need the Qwen model?**  
+A: No. Latency data is already provided in `data/qwen3_1_7b_latency_grid.csv`.
+
+**Q: Are the results valid?**  
+A: Yes for relative comparisons. The simulator preserves algorithmic differences between schedulers.
 
 ---
 
@@ -397,48 +254,25 @@ This simulator follows the **wind tunnel testing** approach:
 2. Memory-Aware and SLA-Constrained Dynamic Batching for LLM Inference
 
 ### Dataset
-- **BurstGPT**: [https://github.com/HPMLL/BurstGPT](https://github.com/HPMLL/BurstGPT)
+- **BurstGPT**: [github.com/HPMLL/BurstGPT](https://github.com/HPMLL/BurstGPT)
 - Real ChatGPT/GPT-4 workload traces from Azure (121 days, 5.29M requests)
 
 ### Model
-- **Qwen3-0.6B**: [https://huggingface.co/Qwen/Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B)
-- Alternative: **Qwen2.5-0.5B** (currently available)
-
-### Framework
-- **vLLM**: High-throughput LLM serving framework for calibration
-
----
-
-## FAQ
-
-**Q: Do I need a GPU to run experiments?**  
-A: No! The simulator runs on CPU. GPU is only needed for GPU calibration (optional for enhanced realism).
-
-**Q: Do I need the actual Qwen model?**  
-A: No! The simulator uses GPU-calibrated latency data (already provided). You only need the model if re-calibrating from scratch.
-
-**Q: Are the results valid without real GPU measurements?**  
-A: Yes! The provided GPU calibration data enables production-realistic simulations. Relative scheduler comparisons are scientifically valid.
-
-**Q: How do I run experiments?**  
-A: See the Usage Examples section above or run `python scripts/run_mb_dynamic.py --help` for all options.
+- **Qwen3-1.7B**: [huggingface.co/Qwen/Qwen3-1.7B](https://huggingface.co/Qwen/Qwen3-1.7B)
 
 ---
 
 ## Citation
 
-If you use this simulator in your research, please cite:
-
 ```bibtex
 @software{multibin_dynamic_scheduler,
   title={Multi-Bin Dynamic Batching Scheduler for LLM Inference},
-  author={Your Name},
   year={2025},
   note={Paper-faithful implementation of multi-bin batching and dynamic batching algorithms}
 }
 ```
 
-And cite the BurstGPT dataset:
+BurstGPT dataset:
 ```bibtex
 @inproceedings{BurstGPT,
   author = {Yuxin Wang and Yuhan Chen and Zeyu Li and Xueze Kang and others},
@@ -450,11 +284,5 @@ And cite the BurstGPT dataset:
 
 ---
 
-## License
-
-See LICENSE file for details.
-
----
-
-**Status:** ✅ Production-ready with BurstGPT dataset + GPU-calibrated latency  
+**Status:** ✅ Production-ready  
 **Last Updated:** November 2025

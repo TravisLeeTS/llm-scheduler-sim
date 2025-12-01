@@ -104,8 +104,8 @@ def run_single_test(
         simulator = Simulator(cfg, requests, scheduler_type)
         completed_requests = simulator.run()
         
-        # Compute metrics
-        metrics = compute_metrics(completed_requests)
+        # Compute metrics (pass d_sla for paper-faithful SLA evaluation)
+        metrics = compute_metrics(completed_requests, d_sla=d_sla)
         gpu_stats = simulator.get_gpu_stats()
         gpu_metrics = compute_gpu_utilization(gpu_stats)
         batch_stats = compute_batch_statistics(completed_requests)
@@ -675,8 +675,8 @@ def main():
                        help='Use RPS scaling for stress testing (default: True)')
     parser.add_argument('--rps-scaling', type=float, default=200.0,
                        help='RPS scaling factor (default: 200.0 for stress testing)')
-    parser.add_argument('--d-sla', type=float, default=1.0,
-                       help='SLA deadline in seconds (default: 1.0)')
+    parser.add_argument('--d-sla', type=float, default=0.05,
+                       help='Per-token decode latency SLA (TBT) in seconds (default: 0.05 = 50ms)')
     parser.add_argument('--dataset', type=str, default='data/BurstGPT_sample.csv',
                        help='Path to BurstGPT dataset')
     parser.add_argument('--calibration', type=str, default='data/qwen3_1_7b_latency_grid.csv',

@@ -1,0 +1,7 @@
+timestamp,scheduler_type,num_requests,num_gpus,k_bins,execution_time_seconds,status,error
+2025-11-29 22:50:07,multi_bin_dynamic,1000000,64,1,40.06019353866577,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+2025-11-29 22:50:48,multi_bin_dynamic,1000000,64,2,40.05359935760498,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+2025-11-29 22:51:31,multi_bin_dynamic,1000000,64,4,43.17089366912842,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+2025-11-29 22:52:17,multi_bin_dynamic,1000000,100,1,46.25380730628967,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+2025-11-29 22:53:05,multi_bin_dynamic,1000000,100,2,48.01614046096802,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+2025-11-29 22:53:59,multi_bin_dynamic,1000000,100,4,53.53298544883728,failed,"ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"

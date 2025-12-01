@@ -27,7 +27,7 @@ def test_scheduler(scheduler_type, num_gpus=1):
         K_BINS=4,
         NUM_REQUESTS=1000,
         SEED=42,
-        D_SLA=1.0,
+        D_SLA=0.05,
         DATASET_PATH="data/BurstGPT_sample.csv",
         WORKLOAD_SOURCE="burstgpt_dataset",
         RPS_SCALING=200.0,
@@ -40,7 +40,7 @@ def test_scheduler(scheduler_type, num_gpus=1):
     requests = generate_workload(cfg)
     simulator = Simulator(cfg, requests, scheduler_type)
     completed = simulator.run()
-    metrics = compute_metrics(completed)
+    metrics = compute_metrics(completed, d_sla=cfg.D_SLA)
     elapsed = time.time() - start
     
     print(f"\n[Results]")
