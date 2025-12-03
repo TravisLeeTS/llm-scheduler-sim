@@ -36,6 +36,8 @@ RPS_SCALING = 100.0      # 100x gives ~27 req/s, good differentiation
 GPU_COUNTS = [1, 2, 4, 8, 16, 32, 64, 100]
 BIN_COUNTS = [1, 2, 4, 8, 16, 32]
 REQUEST_COUNTS = [1000, 10000, 100000, 1000000]
+# Optional safety cap to skip extremely large configs (0 = no cap)
+MAX_REQUESTS_CAP = int(os.environ.get("STEP1_MAX_REQUESTS", 0))
 
 
 def run_single_experiment(num_requests, num_gpus, k_bins):
@@ -128,13 +130,12 @@ def save_result(result):
     os.makedirs(RESULTS_DIR, exist_ok=True)
     
     df_new = pd.DataFrame([result])
-    if os.path.exists(RESULTS_FILE):
-        df_existing = pd.read_csv(RESULTS_FILE)
-        df_combined = pd.concat([df_existing, df_new], ignore_index=True)
-    else:
-        df_combined = df_new
-    
-    df_combined.to_csv(RESULTS_FILE, index=False)
+    df_new.to_csv(
+        RESULTS_FILE,
+        mode='a' if os.path.exists(RESULTS_FILE) else 'w',
+        header=not os.path.exists(RESULTS_FILE),
+        index=False,
+    )
 
 
 def main():
@@ -154,12 +155,17 @@ def main():
     completed = get_completed_configs()
     print(f"Already completed: {len(completed)} configurations")
     
-    total_configs = len(REQUEST_COUNTS) * len(GPU_COUNTS) * len(BIN_COUNTS)
+    total_configs = sum(
+        1 for n in REQUEST_COUNTS
+        for g in GPU_COUNTS
+        for k in BIN_COUNTS
+        if not MAX_REQUESTS_CAP or n <= MAX_REQUESTS_CAP
+    )
     remaining_count = sum(
         1 for n in REQUEST_COUNTS
         for g in GPU_COUNTS
         for k in BIN_COUNTS
-        if (n, g, k) not in completed
+        if (not MAX_REQUESTS_CAP or n <= MAX_REQUESTS_CAP) and (n, g, k) not in completed
     )
     print(f"Total configurations: {total_configs}")
     print(f"Remaining: {remaining_count}")
@@ -169,6 +175,9 @@ def main():
     for num_requests in REQUEST_COUNTS:
         for num_gpus in GPU_COUNTS:
             for k_bins in BIN_COUNTS:
+                if MAX_REQUESTS_CAP and num_requests > MAX_REQUESTS_CAP:
+                    print(f"[skip] requests={num_requests}, cap={MAX_REQUESTS_CAP} (set STEP1_MAX_REQUESTS=0 to run)")
+                    continue
                 key = (num_requests, num_gpus, k_bins)
                 if key in completed:
                     continue

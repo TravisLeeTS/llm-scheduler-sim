@@ -193,18 +193,18 @@ class SLAController:
         
         Case 1: τ_avg > D_SLA + eps_D (latency too high)
             - Shrink window to the left (reduce batch size)
-            - b_high_t ≈ max(b_avg, b_low_{t-1} + α)
-            - b_low_t ≈ max(b_low_{t-1} - δ, B_min)
+            - b_high_t ≈ max(b_avg, b_low_{t-1} + alpha_step)
+            - b_low_t ≈ max(b_low_{t-1}  - delta_step, B_min)
         
         Case 2: τ_avg < D_SLA - eps_D (latency too low, can increase)
             - Shift window to the right (increase batch size)
-            - b_low_t ≈ min(b_avg, b_high_{t-1} - α)
-            - b_high_t ≈ min(b_high_{t-1} + δ, B_max)
+            - b_low_t ≈ min(b_avg, b_high_{t-1} - alpha_step)
+            - b_high_t ≈ min(b_high_{t-1}  + delta_step, B_max)
         
         Case 3: SLA approximately satisfied
             - Center window around current average
-            - b_high_t = min(b_avg + α/2, B_max)
-            - b_low_t = max(b_avg - α/2, B_min)
+            - b_high_t = min(b_avg + delta/2, B_max)
+            - b_low_t = max(b_avg - delta/2, B_min)
         
         Final: b_SLA = floor((b_low + b_high) / 2), clamped by N_decode and B_max
         
@@ -215,30 +215,30 @@ class SLAController:
         if self.tau_avg == 0.0 or self.update_count < 3:
             return (self.b_low + self.b_high) // 2
         
-        α = self.alpha_step
-        δ = self.delta_step
+        alpha_step = self.alpha_step
+        delta_step = self.delta_step
         
         if self.tau_avg > self.D_SLA + self.eps_D:
             # Case 1: Latency too high → shrink interval to left
             # We need smaller batch sizes
-            new_b_high = max(int(self.b_avg), self.b_low + α)
-            new_b_low = max(self.b_low - δ, self.B_min)
+            new_b_high = max(int(self.b_avg), self.b_low + alpha_step)
+            new_b_low = max(self.b_low  - delta_step, self.B_min)
             self.b_high = min(self.b_high, new_b_high)  # Only shrink, never expand
             self.b_low = new_b_low
             
         elif self.tau_avg < self.D_SLA - self.eps_D:
             # Case 2: Latency comfortably below SLA → expand interval to right
             # We can increase batch size for more throughput
-            new_b_low = min(int(self.b_avg), self.b_high - α)
-            new_b_high = min(self.b_high + δ, self.B_max)
+            new_b_low = min(int(self.b_avg), self.b_high - alpha_step)
+            new_b_high = min(self.b_high  + delta_step, self.B_max)
             self.b_low = max(self.b_low, new_b_low)  # Only shift right, never left
             self.b_high = new_b_high
             
         else:
             # Case 3: SLA approximately satisfied → center around current
-            half_α = α // 2
-            self.b_high = min(int(self.b_avg) + half_α, self.B_max)
-            self.b_low = max(int(self.b_avg) - half_α, self.B_min)
+            half_delta = delta_step // 2
+            self.b_high = min(int(self.b_avg)  + half_delta, self.B_max)
+            self.b_low = max(int(self.b_avg)  - half_delta, self.B_min)
         
         # Ensure valid interval
         self.b_low = max(self.B_min, self.b_low)
@@ -903,3 +903,4 @@ class FixedBatchSizer:
                            N_decode: int = 0, N_prefill: int = 0, decode_tbt: float = None) -> None:
         """No-op for fixed batcher (no feedback loop)."""
         pass
+
