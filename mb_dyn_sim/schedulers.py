@@ -581,6 +581,8 @@ class DynamicBatcher:
         now: float,
         candidates: List[Request],
         bin_idx: int = -1,
+        N_decode: int = 0,
+        N_prefill: int = 0,
     ) -> tuple[List[Request], float]:
         """
         Construct batch using b_target = min(b_mem, b_SLA) (paper algorithm).
@@ -593,10 +595,17 @@ class DynamicBatcher:
         - Can support larger batches with same SLA
         - Throughput_k = B / E[T_batch,k] increases with k
         
+        Paper requirement (Algorithm 1):
+        - b_mem only tightens when both N_decode > 0 AND N_prefill > 0
+        - This prevents oscillation when workload is unbalanced
+        - N_decode/N_prefill track concurrent decode/prefill requests
+        
         Args:
             now: Current simulation time
             candidates: List of candidate requests to batch from
             bin_idx: Which bin these candidates are from (-1 for no bin)
+            N_decode: Number of decode requests currently in system (from GPUState)
+            N_prefill: Number of prefill requests currently in system (from GPUState)
         
         Returns:
             Tuple of (selected_requests, predicted_service_time)
@@ -615,7 +624,9 @@ class DynamicBatcher:
         # Compute target batch size using paper algorithms
         # With bin-specific stats, b_mem and b_SLA are tuned to the bin's characteristics
         # b_mem respects per-bin batch limits for longer sequences
-        b_mem = compute_b_mem(stats, self.cfg, bin_idx=bin_idx)
+        # Pass N_decode/N_prefill so b_mem can enforce paper's concurrency-aware constraint
+        b_mem = compute_b_mem(stats, self.cfg, bin_idx=bin_idx, 
+                              N_decode=N_decode, N_prefill=N_prefill)
         b_SLA = sla_controller.compute_b_SLA()
         b_target = min(b_mem, b_SLA)
         
@@ -855,13 +866,17 @@ class FixedBatchSizer:
         self.batch_size = cfg.B_FIXED
         self.service_time_fn = service_time_fn
     
-    def make_batch(self, now: float, candidates: List[Request]) -> tuple[List[Request], float]:
+    def make_batch(self, now: float, candidates: List[Request], 
+                   bin_idx: int = -1, N_decode: int = 0, N_prefill: int = 0) -> tuple[List[Request], float]:
         """
         Take exactly batch_size requests (or all if fewer available).
         
         Args:
             now: Current simulation time
             candidates: List of candidate requests
+            bin_idx: Bin index (ignored for fixed batch sizing, kept for interface compatibility)
+            N_decode: Number of decode requests (ignored, kept for interface compatibility)
+            N_prefill: Number of prefill requests (ignored, kept for interface compatibility)
         
         Returns:
             Tuple of (batch, service_time)
@@ -884,6 +899,7 @@ class FixedBatchSizer:
         
         return batch, service_time
     
-    def update_after_batch(self, batch: List[Request], service_time: float) -> None:
+    def update_after_batch(self, batch: List[Request], service_time: float, bin_idx: int = -1,
+                           N_decode: int = 0, N_prefill: int = 0, decode_tbt: float = None) -> None:
         """No-op for fixed batcher (no feedback loop)."""
         pass

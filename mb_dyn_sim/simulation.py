@@ -366,19 +366,30 @@ class Simulator:
             # Dynamic batching (dynamic_no_bins or multi_bin_dynamic)
             # Only multi_bin_dynamic uses bin-specific statistics (bin_idx >= 0)
             # dynamic_no_bins always uses global statistics (bin_idx = -1)
+            
+            # Compute N_decode/N_prefill from GPU states for Algorithm 1 (memory constraint)
+            # N_decode = decode requests on other GPUs (currently in-flight)
+            # N_prefill = new requests being processed (arriving batch)
+            N_decode = sum(len(g.current_batch) for g in self.gpus if g.busy)
+            N_prefill = len(candidates)  # Candidates represent new prefill work
+            
             if self.scheduler_type == "dynamic_no_bins":
                 # Force global statistics for dynamic_no_bins (no bin information)
                 batch, service_time = self.batcher.make_batch(
                     self.current_time,
                     candidates,
-                    bin_idx=-1  # Always use global statistics
+                    bin_idx=-1,  # Always use global statistics
+                    N_decode=N_decode,
+                    N_prefill=N_prefill,
                 )
             else:
                 # multi_bin_dynamic uses bin-specific statistics
                 batch, service_time = self.batcher.make_batch(
                     self.current_time,
                     candidates,
-                    bin_idx=bin_idx  # Enables bin-specific statistics and SLA control
+                    bin_idx=bin_idx,  # Enables bin-specific statistics and SLA control
+                    N_decode=N_decode,
+                    N_prefill=N_prefill,
                 )
             
             

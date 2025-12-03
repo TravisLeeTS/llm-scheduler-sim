@@ -77,9 +77,9 @@ def main():
     
     parser.add_argument(
         '--use-real-calibration',
-        action='store_true',
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help='Use real GPU calibration data (default: True for Level 4)'
+        help='Use real GPU calibration data (use --no-use-real-calibration to disable)'
     )
     
     parser.add_argument(
@@ -98,9 +98,9 @@ def main():
     
     parser.add_argument(
         '--use-equal-mass-bins',
-        action='store_true',
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help='Use equal-mass bin boundaries (paper requirement, default: True)'
+        help='Use equal-mass bin boundaries (use --no-use-equal-mass-bins to disable)'
     )
     
     parser.add_argument(
@@ -133,10 +133,17 @@ def main():
     )
     
     parser.add_argument(
-        '--d-sla',
+        '--d-sla-token',
         type=float,
-        default=0.5,
-        help='SLA deadline in seconds (default: 0.5 - STRICT for high-pressure)'
+        default=0.010,
+        help='Per-token decode TBT SLA in seconds (default: 0.010 = 10ms)'
+    )
+    
+    parser.add_argument(
+        '--d-sla-request',
+        type=float,
+        default=10.0,
+        help='Per-request total latency SLA in seconds (default: 10.0s)'
     )
     
     parser.add_argument(
@@ -163,12 +170,18 @@ def main():
         return
     
     # Create configuration
+    # D_SLA, D_SLA_TOKEN, and D_SLA_REQUEST are all set consistently:
+    # - D_SLA: Used by SLA controller for batch size decisions
+    # - D_SLA_TOKEN: Used for per-token violation evaluation (same as D_SLA)
+    # - D_SLA_REQUEST: Used for per-request violation evaluation
     cfg = SchedulerConfig(
         NUM_GPUS=args.num_gpus,
         K_BINS=args.k_bins,
         NUM_REQUESTS=args.num_requests,
         SEED=args.seed,
-        D_SLA=args.d_sla,
+        D_SLA=args.d_sla_token,           # Controller uses token SLA
+        D_SLA_TOKEN=args.d_sla_token,     # Per-token evaluation threshold
+        D_SLA_REQUEST=args.d_sla_request, # Per-request evaluation threshold
         DATASET_PATH=args.dataset_path,
         WORKLOAD_SOURCE="burstgpt_dataset",
         RPS_SCALING=args.rps_scaling,

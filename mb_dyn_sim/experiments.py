@@ -19,6 +19,15 @@ from .metrics import (
 )
 
 
+# Load level multipliers for workload intensity
+# These modify NUM_REQUESTS and RPS_SCALING to create different pressure levels
+LOAD_LEVEL_CONFIG = {
+    "low": {"request_mult": 0.25, "rps_mult": 0.5},    # 25% requests, 50% RPS
+    "medium": {"request_mult": 1.0, "rps_mult": 1.0},  # baseline
+    "high": {"request_mult": 2.0, "rps_mult": 2.0},    # 2x requests, 2x RPS
+}
+
+
 def run_experiment(
     cfg: SchedulerConfig,
     scheduler_type: str,
@@ -31,7 +40,7 @@ def run_experiment(
     Args:
         cfg: Scheduler configuration
         scheduler_type: Type of scheduler ("static_fifo", "dynamic_no_bins", "multi_bin_dynamic")
-        load_level: Load level ("low", "medium", "high")
+        load_level: Load level ("low", "medium", "high") - affects NUM_REQUESTS and RPS_SCALING
         seed: Random seed (uses cfg.SEED if None)
     
     Returns:
@@ -41,17 +50,35 @@ def run_experiment(
     if seed is not None:
         cfg.SEED = seed
     
+    # Apply load level multipliers to workload intensity
+    load_config = LOAD_LEVEL_CONFIG.get(load_level, LOAD_LEVEL_CONFIG["medium"])
+    original_num_requests = cfg.NUM_REQUESTS
+    original_rps_scaling = cfg.RPS_SCALING
+    
+    cfg.NUM_REQUESTS = max(10, int(cfg.NUM_REQUESTS * load_config["request_mult"]))
+    cfg.RPS_SCALING = cfg.RPS_SCALING * load_config["rps_mult"]
+    
     # Generate workload
-    print(f"Generating {load_level} load workload...")
+    print(f"Generating {load_level} load workload (requests={cfg.NUM_REQUESTS}, RPS_mult={load_config['rps_mult']})...")
     requests = generate_workload(cfg)
+    
+    # Restore original config values to avoid side effects
+    cfg.NUM_REQUESTS = original_num_requests
+    cfg.RPS_SCALING = original_rps_scaling
     
     # Run simulation
     print(f"Running {scheduler_type} scheduler...")
     sim = Simulator(cfg, requests, scheduler_type=scheduler_type)
     completed = sim.run()
     
-    # Compute metrics (pass d_sla for paper-faithful SLA evaluation)
-    metrics = compute_metrics(completed, d_sla=cfg.D_SLA)
+    # Compute metrics (pass SLA thresholds for paper-faithful evaluation)
+    # d_sla_token: per-token decode TBT threshold (D_SLA_TOKEN)
+    # d_sla_request: per-request total latency threshold (D_SLA_REQUEST)
+    metrics = compute_metrics(
+        completed,
+        d_sla_token=cfg.D_SLA_TOKEN,
+        d_sla_request=cfg.D_SLA_REQUEST
+    )
     gpu_stats = sim.get_gpu_stats()
     gpu_metrics = compute_gpu_utilization(gpu_stats)
     batch_stats = compute_batch_statistics(completed)

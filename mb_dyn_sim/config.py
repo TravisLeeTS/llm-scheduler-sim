@@ -184,12 +184,6 @@ class SchedulerConfig:
             bin_b_max.append(b_max_k)
         
         return bin_b_max
-        
-        if self.NUM_GPUS < 1:
-            raise ValueError("NUM_GPUS must be >= 1")
-        
-        if self.K_BINS < 1:
-            raise ValueError("K_BINS must be >= 1")
     
     def get_batch_composition_stats(self) -> dict:
         """
